@@ -71,7 +71,11 @@ public class Tuple implements Serializable {
     public void setField(int i, Field f) {
         // some code goes here
         if (i < myFields.length && i >= 0) {
-            myFields[i] = f;
+            if (myTupleDesc.getFieldType(i) != f.getType()) {
+                throw new RuntimeException("Derp");
+            } else {
+                myFields[i] = f;
+            }
         }
     }
 

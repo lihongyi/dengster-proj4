@@ -149,6 +149,9 @@ public class TupleDesc implements Serializable {
      */
     public int fieldNameToIndex(String name) throws NoSuchElementException {
         // some code goes here
+        if (name == null) {
+            throw new NoSuchElementException("No such element.");
+        }
         int counter = 0;
         for (TDItem td_item : TDItems) {
             if (td_item.fieldName.equals(name)) {
