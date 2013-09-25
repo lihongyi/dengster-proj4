@@ -109,7 +109,15 @@ public class Tuple implements Serializable {
      */
     public String toString() {
         // some code goes here
-        throw new UnsupportedOperationException("Implement this");
+        String retVal = "";
+        for (int i=0; i< myFields.length; i++) {
+            if (i == myFields.length-1) {
+                retVal = retVal + myFields[i] + "\n";
+            } else {
+                retVal = retVal + myFields[i] + "\t";
+            }
+        }
+        return retVal;
     }
     
     /**

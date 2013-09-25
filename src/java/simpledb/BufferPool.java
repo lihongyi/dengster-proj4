@@ -55,7 +55,7 @@ public class BufferPool {
         // some code goes here
 
 
-        if (myPages.size() >= maxPages) {
+        if (myPages.size() > maxPages) {
             throw new DbException("No space, son.");
         } else if (myPages.containsKey(pid)) {
             return myPages.get(pid);

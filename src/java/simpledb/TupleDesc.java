@@ -270,6 +270,16 @@ public class TupleDesc implements Serializable {
      */
     public String toString() {
         // some code goes here
-        return "";
+        String retVal = "";
+        int i = 0;
+        for (TDItem td_item : TDItems) {
+            if (i == TDItems.size()-1) {
+                retVal = retVal + td_item.fieldType + "(" + td_item.fieldName + "),";
+            } else {
+                retVal = retVal + td_item.fieldType + "(" + td_item.fieldName + ")";
+            }
+            i++;
+        }
+        return retVal;
     }
 }
