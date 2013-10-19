@@ -25,6 +25,9 @@ public class Join extends Operator {
         this.myJoinPredicate = p;
         this.myChild1 = child1;
         this.myChild2 = child2;
+        this.myChildren = new DbIterator[2];
+        this.myChildren[0] = this.myChild1;
+        this.myChildren[1] = this.myChild2;
     }
 
     private JoinPredicate myJoinPredicate;
@@ -85,6 +88,8 @@ public class Join extends Operator {
 
     public void rewind() throws DbException, TransactionAbortedException {
         // some code goes here
+        this.myChild1.rewind();
+        this.myChild2.rewind();
     }
 
     /**
@@ -113,12 +118,14 @@ public class Join extends Operator {
     @Override
     public DbIterator[] getChildren() {
         // some code goes here
-        return null;
+        return this.myChildren;
     }
 
     @Override
     public void setChildren(DbIterator[] children) {
         // some code goes here
+        this.myChildren[0] = children[0];
+        this.myChildren[1] = children[1];
     }
 
 }
