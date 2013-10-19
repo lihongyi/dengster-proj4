@@ -61,8 +61,12 @@ public class BufferPool {
             return myPages.get(pid);
         } else {
             Page retVal = Database.getCatalog().getDbFile(pid.getTableId()).readPage(pid);
+            if (myPages.size() >= maxPages) {
+                throw new DbException("No space, son.");
+            } else {
             myPages.put(pid, retVal);
             return retVal;
+            }
         }
     }
 

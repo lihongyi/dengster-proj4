@@ -54,6 +54,10 @@ public class Predicate implements Serializable {
         }
     }
 
+    private int myField;
+    private Op myOp;
+    private Field myOperand;
+
     /**
      * Constructor.
      * 
@@ -66,6 +70,9 @@ public class Predicate implements Serializable {
      */
     public Predicate(int field, Op op, Field operand) {
         // some code goes here
+        this.myField = field;
+        this.myOp = op;
+        this.myOperand = operand;
     }
 
     /**
@@ -74,7 +81,7 @@ public class Predicate implements Serializable {
     public int getField()
     {
         // some code goes here
-        return -1;
+        return this.myField;
     }
 
     /**
@@ -83,7 +90,7 @@ public class Predicate implements Serializable {
     public Op getOp()
     {
         // some code goes here
-        return null;
+        return this.myOp;
     }
     
     /**
@@ -92,7 +99,7 @@ public class Predicate implements Serializable {
     public Field getOperand()
     {
         // some code goes here
-        return null;
+        return this.myOperand;
     }
     
     /**
@@ -107,7 +114,9 @@ public class Predicate implements Serializable {
      */
     public boolean filter(Tuple t) {
         // some code goes here
-        return false;
+        Field theField = t.getField(this.myField);
+        boolean retVal = theField.compare(this.myOp, this.myOperand);
+        return retVal;
     }
 
     /**
