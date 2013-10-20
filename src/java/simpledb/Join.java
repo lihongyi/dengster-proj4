@@ -47,7 +47,7 @@ public class Join extends Operator {
      * */
     public String getJoinField1Name() {
         // some code goes here
-        return this.myChild1.getTupleDesc().getFieldName(p.getField1());
+        return this.myChild1.getTupleDesc().getFieldName(this.myJoinPredicate.getField1());
     }
 
     /**
@@ -57,7 +57,7 @@ public class Join extends Operator {
      * */
     public String getJoinField2Name() {
         // some code goes here
-        return this.myChild2.getTupleDesc().getFieldName(p.getField2());
+        return this.myChild2.getTupleDesc().getFieldName(this.myJoinPredicate.getField2());
     }
 
     /**
