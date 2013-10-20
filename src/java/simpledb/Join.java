@@ -1,5 +1,4 @@
 package simpledb;
-
 import java.util.*;
 
 /**
@@ -28,6 +27,7 @@ public class Join extends Operator {
         this.myChildren = new DbIterator[2];
         this.myChildren[0] = this.myChild1;
         this.myChildren[1] = this.myChild2;
+        this.myNextChild1 = null;
     }
 
     private JoinPredicate myJoinPredicate;
@@ -78,6 +78,9 @@ public class Join extends Operator {
         super.open();
         this.myChild1.open();
         this.myChild2.open();
+        if (this.myChild1.hasNext()) {
+            this.myNextChild1 = this.myChild1.next();
+        }
     }
 
     public void close() {
@@ -111,8 +114,51 @@ public class Join extends Operator {
      * @see JoinPredicate#filter
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
-        // some code goes here
+
+        while (this.myNextChild1 != null) {
+            while (this.myChild2.hasNext()) {
+                Tuple child1Tuple = this.myNextChild1;
+                Tuple child2Tuple = this.myChild2.next();
+                if (this.myJoinPredicate.filter(child1Tuple, child2Tuple)) {
+                    //merge
+                    return Join.mergeTuple(child1Tuple, child2Tuple);
+                }
+            }
+            this.myChild2.rewind();
+            if (this.myChild1.hasNext()) {
+
+                this.myNextChild1 = this.myChild1.next();
+            } else {
+
+                this.myNextChild1 = null;
+            }
+        }
         return null;
+    }
+
+    protected static Tuple mergeTuple(Tuple t1, Tuple t2) {
+        TupleDesc child1TupleDesc = t1.myTupleDesc;
+        TupleDesc child2TupleDesc = t2.myTupleDesc;
+
+        TupleDesc newTupleDesc = TupleDesc.merge(child1TupleDesc, child2TupleDesc);
+
+        Tuple joinedTuple = new Tuple(newTupleDesc);  
+        int newIndex = 0;
+
+        Iterator<Field> t1Fields = t1.fields();
+        Iterator<Field> t2Fields = t2.fields();
+        while(t1fields.hasNext()) {
+            joinedTuple.setField(newIndex, t1fields.Next());
+            newIndex++;
+        }
+
+        while(t2fields.hasNext()) {
+            joinedTuple.setField(nextIndex, t2fields.Next());
+            newIndex++;
+        }
+
+        return joinedTuple;
+
     }
 
     @Override
