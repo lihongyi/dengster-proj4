@@ -148,13 +148,13 @@ public class Join extends Operator {
 
         Iterator<Field> t1Fields = t1.fields();
         Iterator<Field> t2Fields = t2.fields();
-        while(t1fields.hasNext()) {
-            joinedTuple.setField(newIndex, t1fields.Next());
+        while(t1Fields.hasNext()) {
+            joinedTuple.setField(newIndex, t1Fields.Next());
             newIndex++;
         }
 
-        while(t2fields.hasNext()) {
-            joinedTuple.setField(nextIndex, t2fields.Next());
+        while(t2Fields.hasNext()) {
+            joinedTuple.setField(nextIndex, t2Fields.Next());
             newIndex++;
         }
 
