@@ -94,6 +94,9 @@ public class Join extends Operator {
         // some code goes here
         this.myChild1.rewind();
         this.myChild2.rewind();
+        if (this.myChild1.hasNext()) {
+            this.myNextChild1 = this.myChild1.next();
+        }
     }
 
     /**
