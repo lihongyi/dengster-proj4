@@ -34,6 +34,7 @@ public class Join extends Operator {
     private DbIterator myChild1;
     private DbIterator myChild2;
     private DbIterator[] myChildren;
+    private DbIterator myNextChild1;
 
     public JoinPredicate getJoinPredicate() {
         // some code goes here
@@ -130,15 +131,15 @@ public class Join extends Operator {
                 this.myNextChild1 = this.myChild1.next();
             } else {
 
-                this.myNextChild1 = null;
+                this.myNextChild1 = null;   
             }
         }
         return null;
     }
 
     protected static Tuple mergeTuple(Tuple t1, Tuple t2) {
-        TupleDesc child1TupleDesc = t1.myTupleDesc;
-        TupleDesc child2TupleDesc = t2.myTupleDesc;
+        TupleDesc child1TupleDesc = t1.getTupleDesc();
+        TupleDesc child2TupleDesc = t2.getTupleDesc();
 
         TupleDesc newTupleDesc = TupleDesc.merge(child1TupleDesc, child2TupleDesc);
 
