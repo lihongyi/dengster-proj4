@@ -34,7 +34,7 @@ public class Join extends Operator {
     private DbIterator myChild1;
     private DbIterator myChild2;
     private DbIterator[] myChildren;
-    private DbIterator myNextChild1;
+    private Tuple myNextChild1;
 
     public JoinPredicate getJoinPredicate() {
         // some code goes here
