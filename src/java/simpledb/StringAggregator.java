@@ -84,16 +84,18 @@ public class StringAggregator implements Aggregator {
         Enumeration keys = this.countTable.keys();
         if (this.grouping) {
             while(keys.hasMoreElements()) {
-                Field f = keys.nextElement();
+                Field f = (Field) keys.nextElement();
                 int val = this.countTable.get(f);
                 Tuple newTuple = new Tuple(this.tupleDesc);
                 newTuple.setField(0, f);
+                IntField intF = new IntField(val);
                 newTuple.setField(1, val);
                 tupList.add(newTuple);
             }
         } else {
             Tuple newTuple = new Tuple(this.tupleDesc);
-            newTuple.setField(0, this.count);
+            IntField intF = new IntField(this.count);
+            newTuple.setField(0, intF);
             tupList.add(newTuple);
         }
 
