@@ -48,19 +48,21 @@ public class Aggregate extends Operator {
        
        Type[] typeAr = new Type[2];
        String[] fieldAr = new String[2];
+       Type gfieldType = this.td.getFieldType(gfield);
+       Type afieldType = this.td.getFieldType(afield);
 
        if (this.grouping) {
-            typeAr = new Type[]{ this.td.getFieldType(gfield), this.td.getFieldType(afield) };
-            fieldAr = new String[]{ aop.toString() + this.td.getFieldName(gfield), this.td.getFieldName(afield) };
+            typeAr = new Type[]{ gfieldType , afieldType };
+            fieldAr = new String[]{ aop.toString() + gfieldType, afieldType };
        } else {
             typeAr = new Type[]{ this.td.getFieldType(this.afield) };
-            fieldAr = new String[]{ this.td.getFieldName(this.afield) };
+            fieldAr = new String[]{ afieldType };
        }
 
        if (this.td.getFieldType(afield) == Type.INT_TYPE) {
-            this.agg = new IntegerAggregator(gfield, this.td.getFieldType(this.gfield), afield, aop);
+            this.agg = new IntegerAggregator(gfield, gfieldType, afield, aop);
        } else if (this.td.getFieldType(afield) == Type.STRING_TYPE) {
-            this.agg = new StringAggregator(gfield, this.td.getFieldType(this.gfield), afield, aop);
+            this.agg = new StringAggregator(gfield, gfieldType, afield, aop);
        }
 
        this.newTD = new TupleDesc(typeAr, fieldAr);
