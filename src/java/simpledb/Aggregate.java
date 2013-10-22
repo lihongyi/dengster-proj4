@@ -53,7 +53,7 @@ public class Aggregate extends Operator {
 
        if (this.grouping) {
             typeAr = new Type[]{ gfieldType , afieldType };
-            fieldAr = new String[]{ aop.toString() + gfieldType, afieldType };
+            fieldAr = new String[]{ aop.toString() + gfieldType, this.td.getFieldName(this.afield) };
        } else {
             typeAr = new Type[]{ afieldType };
             fieldAr = new String[]{ this.td.getFieldName(this.afield) };
