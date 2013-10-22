@@ -91,6 +91,13 @@ public class HeapFile implements DbFile {
         /** STILL NEED TO DO THIS SHIT */
         int pagina = page.getId().pageNumber();
         int offset = pagina * BufferPool.PAGE_SIZE;
+        byte[] writeData = new byte[BufferPool.PAGE_SIZE];
+        writeData = page.getPageData();
+        RandomAccessFile f = new RandomAccessFile(this.myFile, "rw");
+        f.seek(offset);
+        f.write(writeData, 0, BufferPool.PAGE_SIZE);
+        f.close();
+        page.markDirty(false, null);
     }
 
     /**

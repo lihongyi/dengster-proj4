@@ -192,6 +192,9 @@ public class BufferPool {
     public synchronized void discardPage(PageId pid) {
         // some code goes here
 	// not necessary for proj1
+        if (this.myPages.containsKey(pid)) {
+            this.myPages.remove(pid);
+        }
     }
 
     /**
@@ -231,7 +234,7 @@ public class BufferPool {
             }
             counter++;
         }
-        this.myPages.remove(remove);
+        this.discardPage(remove);
     }
 
 }
