@@ -50,16 +50,16 @@ public class Aggregate extends Operator {
        String[] fieldAr = new String[2];
 
        if (this.grouping) {
-            typeAr = new Type[]{ this.td.getFieldType(gfield), this.td.getFieldType(afield) }
+            typeAr = new Type[]{ this.td.getFieldType(gfield), this.td.getFieldType(afield) };
             fieldAr = new String[]{ aop.toString() + this.td.getFieldName(gfield), this.td.getFieldName(afield) };
        } else {
             typeAr = new Type[]{ this.td.getFieldType(this.afield) };
             fieldAr = new String[]{ this.td.getFieldName(this.afield) };
        }
 
-       if (afield == Type.INT_TYPE) {
+       if (this.td.getFieldType(afield) == Type.INT_TYPE) {
             this.agg = new IntegerAggregator(gfield, this.td.getFieldType(this.gfield), afield, aop);
-       } else (afield == Type.STRING_TYPE) {
+       } else if (this.td.getFieldType(afield) == Type.STRING_TYPE) {
             this.agg = new IntegerAggregator(gfield, this.td.getFieldType(this.gfield), afield, aop);
        }
 
@@ -84,10 +84,10 @@ public class Aggregate extends Operator {
      * */
     public String groupFieldName() {
         if (this.grouping) {
-            this.td.getFieldName(this.gfield);
-        } else {
-	       return null;
+            return this.td.getFieldName(this.gfield);
         }
+	      
+        return null;
     }
 
     /**
@@ -119,7 +119,7 @@ public class Aggregate extends Operator {
     public void open() throws NoSuchElementException, DbException, TransactionAbortedException {
 	    this.child.open();
         while(child.hasNext()) {
-            this.agg.mergTupleIntoGroup(this.child.next());
+            this.agg.mergeTupleIntoGroup(this.child.next());
         }
         this.agg_iter = this.agg.iterator();
         this.agg_iter.open();
