@@ -140,6 +140,9 @@ public class BufferPool {
             PageId pid = p.getId();
             if (!this.myPages.containsKey(pid)) {
                 this.myPages.put(pid, p); /** LRU stuff */
+                if (this.myPages.size() > maxPages) {
+                    this.evictPage();
+                }
             }
         }
 
