@@ -120,7 +120,7 @@ public class Aggregate extends Operator {
 
     public void open() throws NoSuchElementException, DbException, TransactionAbortedException {
 	    this.child.open();
-        while(child.hasNext()) {
+        while(this.child.hasNext()) {
             this.agg.mergeTupleIntoGroup(this.child.next());
         }
         this.agg_iter = this.agg.iterator();
