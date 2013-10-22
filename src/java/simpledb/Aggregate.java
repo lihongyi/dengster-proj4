@@ -60,7 +60,7 @@ public class Aggregate extends Operator {
        if (this.td.getFieldType(afield) == Type.INT_TYPE) {
             this.agg = new IntegerAggregator(gfield, this.td.getFieldType(this.gfield), afield, aop);
        } else if (this.td.getFieldType(afield) == Type.STRING_TYPE) {
-            this.agg = new IntegerAggregator(gfield, this.td.getFieldType(this.gfield), afield, aop);
+            this.agg = new StringAggregator(gfield, this.td.getFieldType(this.gfield), afield, aop);
        }
 
        this.newTD = new TupleDesc(typeAr, fieldAr);
