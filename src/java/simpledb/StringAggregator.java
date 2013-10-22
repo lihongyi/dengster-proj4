@@ -47,7 +47,7 @@ public class StringAggregator implements Aggregator {
             this.count = 0;
         }
 
-        this.tupleDesc = TupleDesc(typeAr, fieldAr);
+        this.tupleDesc = new TupleDesc(typeAr, fieldAr);
 
     }
 
