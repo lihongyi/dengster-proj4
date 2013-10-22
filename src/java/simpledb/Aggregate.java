@@ -19,6 +19,7 @@ public class Aggregate extends Operator {
     private TupleDesc newTD;
     private Aggregator agg;
     private DbIterator agg_iter;
+    private Type gfieldType;
 
     /**
      * Constructor.
@@ -51,18 +52,18 @@ public class Aggregate extends Operator {
        Type afieldType = this.td.getFieldType(afield);
 
        if (this.grouping) {
-           Type gfieldType = this.td.getFieldType(gfield);
-            typeAr = new Type[]{ gfieldType , afieldType };
-            fieldAr = new String[]{ aop.toString() + gfieldType, this.td.getFieldName(this.afield) };
+           this.gfieldType = this.td.getFieldType(this.gfield);
+            typeAr = new Type[]{ this.gfieldType , afieldType };
+            fieldAr = new String[]{ aop.toString() + this.gfieldType, this.td.getFieldName(this.afield) };
        } else {
             typeAr = new Type[]{ afieldType };
             fieldAr = new String[]{ this.td.getFieldName(this.afield) };
        }
        
        if (this.td.getFieldType(afield) == Type.INT_TYPE) {
-            this.agg = new IntegerAggregator(gfield, gfieldType, afield, aop);
+            this.agg = new IntegerAggregator(gfield, this.gfieldType, afield, aop);
        } else if (this.td.getFieldType(afield) == Type.STRING_TYPE) {
-            this.agg = new StringAggregator(gfield, gfieldType, afield, aop);
+            this.agg = new StringAggregator(gfield, this.gfieldType, afield, aop);
        }
 
 
