@@ -38,11 +38,11 @@ public class StringAggregator implements Aggregator {
         String[] fieldAr = new String[2];
 
         if (this.grouping) {
-            typeAr = new Type[]{gbfieldtype, type.INT_TYPE};
-            fieldAr = new String[]{Op.toString(), "count"}; 
+            typeAr = new Type[]{gbfieldtype, Type.INT_TYPE};
+            fieldAr = new String[]{what.toString(), "count"}; 
             this.countTable = new Hashtable<Field, Integer>();
         } else {
-            typeAr = new Type[]{type.INT_TYPE};
+            typeAr = new Type[]{Type.INT_TYPE};
             fieldAr = new String[]{"count"};
             this.count = 0;
         }
