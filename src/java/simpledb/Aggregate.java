@@ -54,14 +54,15 @@ public class Aggregate extends Operator {
            Type gfieldType = this.td.getFieldType(gfield);
             typeAr = new Type[]{ gfieldType , afieldType };
             fieldAr = new String[]{ aop.toString() + gfieldType, this.td.getFieldName(this.afield) };
-           if (this.td.getFieldType(afield) == Type.INT_TYPE) {
-                this.agg = new IntegerAggregator(gfield, gfieldType, afield, aop);
-           } else if (this.td.getFieldType(afield) == Type.STRING_TYPE) {
-                this.agg = new StringAggregator(gfield, gfieldType, afield, aop);
-           }
        } else {
             typeAr = new Type[]{ afieldType };
             fieldAr = new String[]{ this.td.getFieldName(this.afield) };
+       }
+       
+       if (this.td.getFieldType(afield) == Type.INT_TYPE) {
+            this.agg = new IntegerAggregator(gfield, gfieldType, afield, aop);
+       } else if (this.td.getFieldType(afield) == Type.STRING_TYPE) {
+            this.agg = new StringAggregator(gfield, gfieldType, afield, aop);
        }
 
 
