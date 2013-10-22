@@ -48,10 +48,10 @@ public class Aggregate extends Operator {
        
        Type[] typeAr = new Type[2];
        String[] fieldAr = new String[2];
-       Type gfieldType = this.td.getFieldType(gfield);
        Type afieldType = this.td.getFieldType(afield);
 
        if (this.grouping) {
+           Type gfieldType = this.td.getFieldType(gfield);
             typeAr = new Type[]{ gfieldType , afieldType };
             fieldAr = new String[]{ aop.toString() + gfieldType, this.td.getFieldName(this.afield) };
            if (this.td.getFieldType(afield) == Type.INT_TYPE) {
