@@ -83,7 +83,7 @@ public class StringAggregator implements Aggregator {
         ArrayList<Tuple> tupList = new ArrayList<Tuple>();
         Enumeration keys = this.countTable.keys();
         if (this.grouping) {
-            while(keys.hasMoreElements) {
+            while(keys.hasMoreElements()) {
                 Field f = keys.nextElement();
                 int val = this.countTable.get(f);
                 Tuple newTuple = new Tuple(this.tupleDesc);
