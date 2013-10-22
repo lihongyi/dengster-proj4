@@ -62,11 +62,11 @@ public class BufferPool {
         } else {
             Page retVal = Database.getCatalog().getDbFile(pid.getTableId()).readPage(pid);
             if (myPages.size() >= maxPages) {
-                throw new DbException("No space, son.");
+                this.evictPage();
             } else {
             myPages.put(pid, retVal);
-            return retVal;
             }
+            return retVal;
         }
     }
 
@@ -132,6 +132,17 @@ public class BufferPool {
         throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         // not necessary for proj1
+
+        HeapFile myHeapFile = (HeapFile) Database.getCatalog().getDbFile(tableId);
+        ArrayList<Page> insertTuple = myHeapFile.insertTuple(tid, t);
+        for (Page p : insertTuple) {
+            p.markDirty(true, tid);
+            PageId pid = p.getId();
+            if (!this.myPages.containsKey(pid)) {
+                this.myPages.put(pid, p); /** LRU stuff */
+            }
+        }
+
     }
 
     /**
@@ -151,6 +162,11 @@ public class BufferPool {
         throws DbException, TransactionAbortedException {
         // some code goes here
         // not necessary for proj1
+            int tid2 = t.getRecordId().getPageId().getTableId();
+            HeapFile myHeapFile = (HeapFile) Database.getCatalog().getDbFile(tid2);
+            Page modifiedPage = myHeapFile.deleteTuple(tid, t);
+            modifiedPage.markDirty(true, tid);
+
     }
 
     /**
@@ -161,6 +177,9 @@ public class BufferPool {
     public synchronized void flushAllPages() throws IOException {
         // some code goes here
         // not necessary for proj1
+        for (PageId p : this.myPages.keySet()) {
+            flushPage(p);
+        }
 
     }
 
@@ -181,6 +200,10 @@ public class BufferPool {
     private synchronized  void flushPage(PageId pid) throws IOException {
         // some code goes here
         // not necessary for proj1
+        Page thePage = this.myPages.get(pid);
+        if (thePage.isDirty() != null) {
+            Database.getCatalog().getDbFile(pid.getTableId()).writePage(thePage);   
+        }
     }
 
     /** Write all pages of the specified transaction to disk.
@@ -197,6 +220,17 @@ public class BufferPool {
     private synchronized  void evictPage() throws DbException {
         // some code goes here
         // not necessary for proj1
+        int keySetSize = this.myPages.size();
+        int toRemove = new Random().nextInt(keySetSize);
+        int counter = 0;
+        PageId remove = null;
+        for (PageId p : this.myPages.keySet()) {
+            if (counter == toRemove) {
+                remove = p;
+            }
+            counter++;
+        }
+        this.myPages.remove(remove);
     }
 
 }

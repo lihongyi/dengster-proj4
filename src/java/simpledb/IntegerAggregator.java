@@ -58,7 +58,7 @@ public class IntegerAggregator implements Aggregator {
 
         Field field = tup.getField(this.myGbField);
 
-        /** Need to case field in order to get its value. It's either int or String. */
+        /** Need to cast field in order to get its value. It's either int or String. */
         if (field.getType() == Type.INT_TYPE) {
             IntField intfield = (IntField) field;
             key = intfield.getValue();
@@ -120,14 +120,18 @@ public class IntegerAggregator implements Aggregator {
 
         /** Returned iterator. */
         ArrayList<Tuple> final_iterator = new ArrayList<Tuple>();
+
+
         TupleDesc myTupleDesc;
         if (this.myGbField != Aggregator.NO_GROUPING) {
             Type[] tArray = new Type[2];
             String[] sArray = new String[2];
+
             tArray[0] = this.myGbFieldType;
             tArray[1] = Type.INT_TYPE;
             sArray[0] = "key";
             sArray[1] = this.myWhat.toString();
+
             myTupleDesc = new TupleDesc(tArray, sArray);
         } else {
             Type[] tArray = new Type[1];
@@ -137,14 +141,16 @@ public class IntegerAggregator implements Aggregator {
         for (Object obj : this.myAggregates.keySet()) {
             int value_so_far = this.myAggregates.get(obj);
             Tuple tup = new Tuple(myTupleDesc);
+
             Field groupBy;
             if (this.myGbField == Aggregator.NO_GROUPING) {
                 groupBy = new IntField(0); /** Nobody cares. */
-            } else if (this.myGbFieldType == Type.INT_TYPE) {
-                groupBy = new IntField((Integer) obj);
-            } else /**Then we have a string. */ {
+            } else if (this.myGbFieldType == Type.STRING_TYPE) {
                 groupBy = new StringField((String) obj, this.myGbFieldType.getLen());
+            } else /**Then we have a string. */ {
+                groupBy = new IntField((Integer) obj);
             }
+
             if (this.myWhat == Op.AVG) {
                 value_so_far = value_so_far / this.myAverager.get(obj);
             }
@@ -157,6 +163,7 @@ public class IntegerAggregator implements Aggregator {
             }
             final_iterator.add(tup);
         }
+
         return new TupleIterator(myTupleDesc, final_iterator);
 
     }

@@ -87,6 +87,10 @@ public class HeapFile implements DbFile {
     public void writePage(Page page) throws IOException {
         // some code goes here
         // not necessary for proj1
+
+        /** STILL NEED TO DO THIS SHIT */
+        int pagina = page.getId().pageNumber();
+        int offset = pagina * BufferPool.PAGE_SIZE;
     }
 
     /**
@@ -102,15 +106,47 @@ public class HeapFile implements DbFile {
     public ArrayList<Page> insertTuple(TransactionId tid, Tuple t)
             throws DbException, IOException, TransactionAbortedException {
         // some code goes here
-        return null;
+        BufferPool bPool = Database.getBufferPool();
+        ArrayList<Page> retVal = new ArrayList<Page>();
+        for (int i = 0; i < this.numPages(); i++) {
+            HeapPage getPage = (HeapPage) bPool.getPage(tid, new HeapPageId(this.getId(), i), Permissions.READ_WRITE);
+            if (getPage.getNumEmptySlots() > 0) {
+                getPage.insertTuple(t);
+                retVal.add(getPage);
+                return retVal;
+            }
+        }
+
+
+        /** Or we append shit. */
+        HeapPageId pid = new HeapPageId(this.getId(), this.numPages());
+        HeapPage newPage = new HeapPage(pid, HeapPage.createEmptyPageData());
+        newPage.insertTuple(t);
+        /* Find free page and retrieve it. */
+
+        /** WRITE THAT SHIT. */
+        RandomAccessFile f = new RandomAccessFile(this.myFile, "rw");
+        f.seek(this.numPages() * BufferPool.PAGE_SIZE);
+        f.write(newPage.getPageData(), 0, BufferPool.PAGE_SIZE);
+        f.close();
         // not necessary for proj1
+
+        retVal.add(newPage);
+        return retVal;
     }
+
+
 
     // see DbFile.java for javadocs
     public Page deleteTuple(TransactionId tid, Tuple t) throws DbException,
             TransactionAbortedException {
         // some code goes here
-        return null;
+        BufferPool bPool = Database.getBufferPool();
+        RecordId rid = t.getRecordId();
+        HeapPage page = (HeapPage) bPool.getPage(tid, rid.getPageId(), Permissions.READ_WRITE);
+        page.deleteTuple(t);
+        page.markDirty(true, tid);
+        return page;
         // not necessary for proj1
     }
 
