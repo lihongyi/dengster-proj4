@@ -37,7 +37,7 @@ public class StringAggregator implements Aggregator {
         Type[] typeAr = new Type[2];
         String[] fieldAr = new String[2];
 
-        if (this.grouping) 
+        if (this.grouping) {
             typeAr = new Type[]{gbfieldtype, type.INT_TYPE};
             fieldAr = new String[]{Op.toString(), "count"}; 
             this.countTable = new Hashtable<Field, Integer>();
