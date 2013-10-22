@@ -89,7 +89,7 @@ public class StringAggregator implements Aggregator {
                 Tuple newTuple = new Tuple(this.tupleDesc);
                 newTuple.setField(0, f);
                 IntField intF = new IntField(val);
-                newTuple.setField(1, val);
+                newTuple.setField(1, intF);
                 tupList.add(newTuple);
             }
         } else {
@@ -100,7 +100,6 @@ public class StringAggregator implements Aggregator {
         }
 
         return tupList.iterator();
-        throw new UnsupportedOperationException("please implement me for proj2");
     }
 
 }
