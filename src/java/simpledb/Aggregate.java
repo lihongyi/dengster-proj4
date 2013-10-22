@@ -60,9 +60,9 @@ public class Aggregate extends Operator {
             fieldAr = new String[]{ this.td.getFieldName(this.afield) };
        }
        
-       if (this.td.getFieldType(afield) == Type.INT_TYPE) {
+       if (afieldType == Type.INT_TYPE) {
             this.agg = new IntegerAggregator(gfield, this.gfieldType, afield, aop);
-       } else if (this.td.getFieldType(afield) == Type.STRING_TYPE) {
+       } else if (afieldType == Type.STRING_TYPE) {
             this.agg = new StringAggregator(gfield, this.gfieldType, afield, aop);
        }
 
