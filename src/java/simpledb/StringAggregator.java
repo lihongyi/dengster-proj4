@@ -98,8 +98,8 @@ public class StringAggregator implements Aggregator {
             newTuple.setField(0, intF);
             tupList.add(newTuple);
         }
-
-        return tupList.iterator();
+        Iterator<Tuple> tupListIterator = tupList.iterator();
+        return new TupleIterator(this.tupleDesc, tupListIterator);
     }
 
 }
