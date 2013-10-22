@@ -80,7 +80,24 @@ public class StringAggregator implements Aggregator {
      *   aggregate specified in the constructor.
      */
     public DbIterator iterator() {
-        // some code goes here
+        ArrayList<Tuple> tupList = new ArrayList<Tuple>();
+        Enumeration keys = this.countTable.keys();
+        if (this.grouping) {
+            while(keys.hasMoreElements) {
+                Field f = keys.nextElement();
+                int val = this.countTable.get(f);
+                Tuple newTuple = new Tuple(this.tupleDesc);
+                newTuple.setField(0, f);
+                newTuple.setField(1, val);
+                tupList.add(newTuple);
+            }
+        } else {
+            Tuple newTuple = new Tuple(this.tupleDesc);
+            newTuple.setField(0, this.count);
+            tupList.add(newTuple);
+        }
+
+        return tupList.iterator();
         throw new UnsupportedOperationException("please implement me for proj2");
     }
 
