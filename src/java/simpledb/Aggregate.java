@@ -144,6 +144,7 @@ public class Aggregate extends Operator {
 
     public void rewind() throws DbException, TransactionAbortedException {
 	   this.agg_iter = this.agg.iterator();
+       this.agg_iter.open();
     }
 
     /**
