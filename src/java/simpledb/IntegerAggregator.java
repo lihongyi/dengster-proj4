@@ -51,12 +51,13 @@ public class IntegerAggregator implements Aggregator {
     public void mergeTupleIntoGroup(Tuple tup) {
         // some code goes here
         Object key;
+        Field field;
 
         if (this.myGbField == Aggregator.NO_GROUPING)  {
             key = null; /** No one really cares what the hell this is. */
-        } 
-
-        Field field = tup.getField(this.myGbField);
+        } else {
+            field = tup.getField(this.myGbField);
+        }
 
         /** Need to cast field in order to get its value. It's either int or String. */
         if (field.getType() == Type.INT_TYPE) {
