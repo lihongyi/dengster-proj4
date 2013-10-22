@@ -34,16 +34,16 @@ public class StringAggregator implements Aggregator {
         this.what = what;
         this.grouping = (gbfield != Aggregator.NO_GROUPING);
         
-        Type[] typeAr;
-        String[] fieldAr;
+        Type[] typeAr = new Type[2];
+        String[] fieldAr = new String[2];
 
-        if (this.grouping) {
-            typeAr = {gbfieldtype, type.INT_TYPE};
-            fieldAr = {Op.toString(), "count"}; 
+        if (this.grouping) 
+            typeAr = new Type[]{gbfieldtype, type.INT_TYPE};
+            fieldAr = new String[]{Op.toString(), "count"}; 
             this.countTable = new Hashtable<field, Integer>();
         } else {
-            typeAr = {type.INT_TYPE};
-            fieldAr = {"count"}
+            typeAr = new Type[]{type.INT_TYPE};
+            fieldAr = new String[]{"count"};
             this.count = 0;
         }
 
