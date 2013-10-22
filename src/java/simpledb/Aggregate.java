@@ -55,8 +55,8 @@ public class Aggregate extends Operator {
             typeAr = new Type[]{ gfieldType , afieldType };
             fieldAr = new String[]{ aop.toString() + gfieldType, afieldType };
        } else {
-            typeAr = new Type[]{ this.td.getFieldType(this.afield) };
-            fieldAr = new String[]{ afieldType };
+            typeAr = new Type[]{ afieldType };
+            fieldAr = new String[]{ this.td.getFieldName(this.afield) };
        }
 
        if (this.td.getFieldType(afield) == Type.INT_TYPE) {
