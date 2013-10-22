@@ -57,16 +57,17 @@ public class IntegerAggregator implements Aggregator {
             key = null; /** No one really cares what the hell this is. */
         } else {
             field = tup.getField(this.myGbField);
+                    /** Need to cast field in order to get its value. It's either int or String. */
+            if (field.getType() == Type.INT_TYPE) {
+                IntField intfield = (IntField) field;
+                key = intfield.getValue();
+            } else {
+                StringField stringfield = (StringField) field;
+                key = stringfield.getValue();
+            }
         }
 
-        /** Need to cast field in order to get its value. It's either int or String. */
-        if (field.getType() == Type.INT_TYPE) {
-            IntField intfield = (IntField) field;
-            key = intfield.getValue();
-        } else {
-            StringField stringfield = (StringField) field;
-            key = stringfield.getValue();
-        }
+
 
         /** We are getting the "incoming" value. */
         int incoming_value = ((IntField) tup.getField(this.myAField)).getValue();
