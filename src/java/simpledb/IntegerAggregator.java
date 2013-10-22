@@ -51,7 +51,7 @@ public class IntegerAggregator implements Aggregator {
     public void mergeTupleIntoGroup(Tuple tup) {
         // some code goes here
         Object key;
-        Field field;
+        Field field = null;
 
         if (this.myGbField == Aggregator.NO_GROUPING)  {
             key = null; /** No one really cares what the hell this is. */
