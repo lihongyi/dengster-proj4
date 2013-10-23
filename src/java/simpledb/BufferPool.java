@@ -242,6 +242,7 @@ public class BufferPool {
     private synchronized  void evictPage() throws DbException {
         // some code goes here
         // not necessary for proj1
+        /** Old random stuff. 
         int keySetSize = this.myPages.size();
         int toRemove = new Random().nextInt(keySetSize);
         int counter = 0;
@@ -252,7 +253,11 @@ public class BufferPool {
             }
             counter++;
         }
-        this.discardPage(remove);
+
+        End random stuff. */
+        PageId remove = null;
+        remove = this.myQueue.get(0);
+        this.discardPage(remove);    
     }
 
 }
