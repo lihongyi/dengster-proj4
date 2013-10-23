@@ -23,6 +23,7 @@ public class BufferPool {
 
     private HashMap<PageId, Page> myPages;
     private int maxPages;
+    private ArrayList<PageId> myQueue;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -33,6 +34,7 @@ public class BufferPool {
         // some code goes here
         maxPages = numPages;
         myPages = new HashMap<PageId, Page>();
+        myQueue = new ArrayList<PageId>();
     }
 
     /**
@@ -56,14 +58,22 @@ public class BufferPool {
 
 
         if (myPages.containsKey(pid)) {
+
+            if (this.myQueue.remove(pid)) {
+                this.myQueue.add(pid);
+            }
+
             return myPages.get(pid);
         } else {
             Page retVal = Database.getCatalog().getDbFile(pid.getTableId()).readPage(pid);
+
             if (myPages.size() > maxPages) {
                 this.evictPage();
             } else {
-            myPages.put(pid, retVal);
+                myPages.put(pid, retVal);
+                this.myQueue.add(pid);
             }
+
             return retVal;
         }
     }
@@ -141,6 +151,11 @@ public class BufferPool {
                 if (this.myPages.size() > maxPages) {
                     this.evictPage();
                 }
+                this.myQueue.add(pid);
+            } else {
+                if (this.myQueue.remove(pid)) {
+                    this.myQueue.add(pid);
+                }
             }
         }
 
@@ -194,6 +209,9 @@ public class BufferPool {
 	// not necessary for proj1
         if (this.myPages.containsKey(pid)) {
             this.myPages.remove(pid);
+            if (this.myQueue.contains(pid)) {
+                this.myQueue.remove(pid);
+            }
         }
     }
 
