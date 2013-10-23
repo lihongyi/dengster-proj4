@@ -66,7 +66,7 @@ public class Aggregate extends Operator {
             this.agg = new StringAggregator(gfield, this.gfieldType, afield, aop);
        }
 
-
+ 
        this.newTD = new TupleDesc(typeAr, fieldAr);
 
 
