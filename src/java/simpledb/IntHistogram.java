@@ -25,7 +25,7 @@ public class IntHistogram {
 
         /** Customary shit. */
         this.numBuckets = buckets;
-        this.theHistogram = new int[this.buckets];
+        this.theHistogram = new int[this.numBuckets];
         this.min = min;
         this.max = max;
 
