@@ -1,4 +1,5 @@
 package simpledb;
+import java.util.*;
 
 /** A class to represent a fixed-width histogram over a single integer-based field.
  */
@@ -26,19 +27,13 @@ public class IntHistogram {
         /** Customary shit. */
         this.numBuckets = buckets;
         this.theHistogram = new int[this.numBuckets];
+        Arrays.fill(this.theHistogram, 0);
         this.min = min;
         this.max = max;
 
-        /** Initialize ze histogram! */
-        for (int i = 0; i < this.numBuckets; i++) {
-            this.theHistogram[i] = 0;
-        }
 
         /** Calculate bucket width. */
-        int diff = max-min;
-        double tempVal = diff/buckets;
-        this.bucketWidth = (int) Math.ceil(diff/numBuckets);
-
+        this.bucketWidth = (int) Math.ceil((double) (this.max - this.min) / this.numBuckets);
 
         this.numberTuples = 0;
     }
@@ -58,10 +53,19 @@ public class IntHistogram {
     public void addValue(int v) {
     	// some code goes here
 
-        /** Find the bucket and add 1 to its count. */
-        double tempVal = v/this.bucketWidth;
-        double wrongBucket = Math.ceil(tempVal);
-        int realBucket = (int) (wrongBucket - 1);
+        /** Go through each bucket, see if value falls within range.
+        /*  If so, then we increase value of bucket by 1 and increment numTuples. */
+
+        for (int i = 0; i < this.theHistogram.length; i++) {
+            int left = min + this.bucketWidth*i;
+            int right = min + this.bucketWidth*(i+1);
+            if (left <= v && v < right) {
+                this.theHistogram[i] += 1;
+                this.numberTuples++; 
+                break;
+            }
+        }
+
     }
 
     /**
@@ -77,7 +81,128 @@ public class IntHistogram {
     public double estimateSelectivity(Predicate.Op op, int v) {
 
     	// some code goes here
-        return -1.0;
+        double retVal = 0.0;
+        switch (op) {
+            case EQUALS: 
+                //do something
+                retVal = eqSelectivity(v);
+                break;
+            case GREATER_THAN:
+                //do something
+                retVal = geSelectivity(v);
+                break;
+            case GREATER_THAN_OR_EQ:
+                retVal = geequalSelectivity(v);
+                break;
+            case LESS_THAN:
+                retVal = leSelectivity(v);
+                break;
+            case LESS_THAN_OR_EQ:
+                retVal = leequalSelectivity(v);
+                break;
+            case NOT_EQUALS:
+                retVal = 1 - eqSelectivity(v);
+            default: 
+                break;
+        }
+
+        return retVal;
+    }
+
+    private double eqSelectivity(int v) {
+        double retVal = 0;
+        for (int i = 0; i < this.theHistogram.length; i++) {
+            int left = min + this.bucketWidth*i;
+            int right = min + this.bucketWidth*(i+1);
+            if (left <= v && v < right) {
+                int height = this.theHistogram[i];
+                retVal = (double) (height/this.bucketWidth) / this.numberTuples;
+            }
+        }
+        return retVal;   
+    }
+
+    private double leSelectivity(int v) {
+        if (v <= min) { return 0;}
+        if (v > max) { return 1;}
+        double retVal = 0;
+        int foundBucket = Integer.MAX_VALUE;
+        for (int i = 0; i < this.theHistogram.length; i++) {
+            int left = min + this.bucketWidth*i;
+            int right = min + this.bucketWidth*(i+1);
+            if (left <= v && v < right) {
+                foundBucket = i;
+                double bLeft = (double) left;
+                double bF = (double) this.theHistogram[i]/this.numberTuples;
+                double bPart = (v-bLeft)/this.bucketWidth;
+                retVal += (bF * bPart);
+            }
+            if (i < foundBucket) {
+                retVal += (double) this.theHistogram[i]/ this.numberTuples;
+            }
+        }
+        return retVal;   
+
+    }
+
+    private double leequalSelectivity(int v) {
+        if (v <= min) { return 0;}
+        if (v > max) { return 1;}
+        double retVal = 0;
+        int foundBucket = Integer.MAX_VALUE;
+        for (int i = 0; i < this.theHistogram.length; i++) {
+            int left = min + this.bucketWidth*i;
+            int right = min + this.bucketWidth*(i+1);
+            if (left <= v && v < right) {
+                foundBucket = i;
+            }
+            if (i <= foundBucket) {
+                retVal += (double) this.theHistogram[i]/ this.numberTuples;
+            }
+        }
+        return retVal;           
+    }
+
+    private double geequalSelectivity(int v) {
+        if (v < min) { return 1;}
+        if (v >= max) { return 0;}
+        double retVal = 0;
+        int foundBucket = Integer.MAX_VALUE;
+        for (int i = 0; i < this.theHistogram.length; i++) {
+            int left = min + this.bucketWidth*i;
+            int right = min + this.bucketWidth*(i+1);
+            if (left <= v && v < right) {
+                foundBucket = i;
+            }
+            if (i >= foundBucket) {
+                retVal += (double) this.theHistogram[i]/ this.numberTuples;
+            }
+        }
+        return retVal;   
+
+    }
+
+    private double geSelectivity(int v) {
+        if (v < min) { return 1;}
+        if (v >= max) { return 0;}
+        double retVal = 0;
+        int foundBucket = Integer.MAX_VALUE;
+        for (int i = 0; i < this.theHistogram.length; i++) {
+            int left = min + this.bucketWidth*i;
+            int right = min + this.bucketWidth*(i+1);
+            if (i > foundBucket) {
+                retVal += (double) this.theHistogram[i]/ this.numberTuples;
+            }
+            if (left <= v && v < right) {
+                foundBucket = i;
+                double bRight = (double) right;
+                double bF = (double) this.theHistogram[i]/this.numberTuples;
+                double bPart = (bRight-v)/this.bucketWidth;
+                retVal += (bF * bPart);
+            }
+        }
+        return retVal;   
+
     }
     
     /**
