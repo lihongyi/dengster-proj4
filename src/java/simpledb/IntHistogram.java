@@ -24,20 +24,20 @@ public class IntHistogram {
     	// some code goes here
 
         /** Customary shit. */
-        this.buckets = buckets;
+        this.numBuckets = buckets;
         this.theHistogram = new int[this.buckets];
         this.min = min;
         this.max = max;
 
         /** Initialize ze histogram! */
-        for (int i = 0; i < this.buckets; i++) {
+        for (int i = 0; i < this.numBuckets; i++) {
             this.theHistogram[i] = 0;
         }
 
         /** Calculate bucket width. */
         int diff = max-min;
         double tempVal = diff/buckets;
-        this.bucketWidth = (int) Math.ceil(diff/buckets);
+        this.bucketWidth = (int) Math.ceil(diff/numBuckets);
 
 
         this.numberTuples = 0;
