@@ -25,7 +25,7 @@ public class IntHistogram {
 
         /** Customary shit. */
         this.buckets = buckets;
-        this.theHistogram = new int[this.buckets]
+        this.theHistogram = new int[this.buckets];
         this.min = min;
         this.max = max;
 
@@ -37,7 +37,7 @@ public class IntHistogram {
         /** Calculate bucket width. */
         int diff = max-min;
         double tempVal = diff/buckets;
-        this.bucketWidth = (int) Math.ceil(diff/buckets)
+        this.bucketWidth = (int) Math.ceil(diff/buckets);
 
 
         this.numberTuples = 0;
