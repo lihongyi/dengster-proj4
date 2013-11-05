@@ -22,7 +22,34 @@ public class IntHistogram {
      */
     public IntHistogram(int buckets, int min, int max) {
     	// some code goes here
+
+        /** Customary shit. */
+        this.buckets = buckets;
+        this.theHistogram = new int[this.buckets]
+        this.min = min;
+        this.max = max;
+
+        /** Initialize ze histogram! */
+        for (int i = 0; i < this.buckets; i++) {
+            this.theHistogram[i] = 0;
+        }
+
+        /** Calculate bucket width. */
+        int diff = max-min;
+        double tempVal = diff/buckets;
+        this.bucketWidth = (int) Math.ceil(diff/buckets)
+
+
+        this.numberTuples = 0;
     }
+
+    private int numBuckets;
+    private int min;
+    private int max;
+    private int[] theHistogram;
+    private int bucketWidth;
+    private int numberTuples;
+
 
     /**
      * Add a value to the set of values that you are keeping a histogram of.
@@ -30,6 +57,11 @@ public class IntHistogram {
      */
     public void addValue(int v) {
     	// some code goes here
+
+        /** Find the bucket and add 1 to its count. */
+        double tempVal = v/this.bucketWidth;
+        double wrongBucket = Math.ceil(tempVal);
+        int realBucket = (int) (wrongBucket - 1);
     }
 
     /**
