@@ -12,6 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class is not needed in implementing proj1 and proj2.
  */
 public class TableStats {
+    private static int ioCostPerPage;
+    private static DbFile dbFile;
+    private static int numTuples = 0;
 
     private static final ConcurrentHashMap<String, TableStats> statsMap = new ConcurrentHashMap<String, TableStats>();
 
@@ -84,7 +87,105 @@ public class TableStats {
         // You should try to do this reasonably efficiently, but you don't
         // necessarily have to (for example) do everything
         // in a single scan of the table.
-        // some code goes here
+        
+        DbFile dbFile = Database.getCatalog().getDbFile(tableid);
+        TupleDesc tupleDesc = dbFile.getTupleDesc();
+        TransactionId tid = new TransactionId();
+        DbFileIterator dbIterator = dbFile.iterator(tid);
+
+        HashMap<String, Integer> minMap = new HashMap<String, Integer>();
+
+        HashMap<String, Integer> maxMap = new HashMap<String, Integer>();
+
+
+        this.dbFile = dbFile; 
+        this.ioCostPerPage = ioCostPerPage;
+
+
+        dbIterator.open();
+
+        while(dbIterator.hasNext()) {
+            Tuple tuple = dbIterator.next();
+            numTuples++;
+
+            for (int i = 0; i < tupleDesc.numFields(); i++) {
+                String fieldName = tupleDesc.getFieldName(i);
+
+                if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
+
+                    IntField field =  (IntField) tuple.getField;
+                    int fieldValue = field.getValue();
+
+                    if (!(minMap.containsKey(fieldName) && maxMap.containsKey(fieldName))) {
+                        minMap.put(fieldName, fieldValue);
+                        maxMap.put(fieldName, fieldValue);
+                    } else {
+
+                        if (fieldValue <  minMap.get(fieldName)) {
+                            minMap.put(fieldName, fieldValue);
+                        }
+
+                        if (fieldValue > maxMap.get(fieldName)) {
+                            maxMap.put(fieldName, fieldValue);
+                        }
+                    }
+
+                }
+            }
+
+            dbIterator.close();
+
+        }
+
+
+
+        tid = new TransactionId();
+        dbIterator = dbFile.iterator(tid);
+        HashMap<String, IntHistogram> intHistMap = new HashMap<String, IntHistogram>();
+        HashMap<String, StringHistogram> strHistMap = new HashMap<String,StringHistogram>();
+        dbIterator.open();
+
+        while(dbIter.hasNext()) {
+            Tuple tuple = dbIterator.next();
+
+
+            for (int i = 0; i < tupleDesc.numFields(); i++) {
+                String fieldName = tupleDesc.getFieldName(i);
+
+                if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
+
+                    IntField field =  (IntField) tuple.getField(i);
+                    int fieldValue = field.getValue();
+
+                    if(!intHistMap.containsKey(fieldName)) {
+                        intHistMap.put(fieldName, new IntHistogram(NUM_HIST_BINS, minMap.get(fieldName), maxMap.get(fieldName)));
+                    }
+
+                    IntHistogram intHist = intHistMap.get(fieldName);
+                    intHist.addValue(fieldValue);
+                    intHistMap.put(fieldName, intHist);
+
+
+                } else {
+
+                    StringField field = (StringField) tuple.getField(i);
+                    int fieldValue = field.getValue();
+
+                    if(!(strHistMap.containsKey(fieldName))) {
+                        strHistMap.put(fieldName, new StringHistogram(NUM_HIST_BINS));
+                    }
+                    StringHistogram strHist = strHistMap.get(fieldName);
+                    strHist.addValue(fieldValue);
+                    strHistMap.put(fieldName, strHist);
+
+                }
+
+            }
+        }
+
+        dbIterator.close();
+
+
     }
 
     /**
@@ -100,8 +201,9 @@ public class TableStats {
      * @return The estimated cost of scanning the table.
      */
     public double estimateScanCost() {
-        // some code goes here
-        return 0;
+        int numPages = this.dbFile.numPages();
+        double result = numPages * this.ioCostPerPage;
+        return result;
     }
 
     /**
@@ -114,8 +216,7 @@ public class TableStats {
      *         selectivityFactor
      */
     public int estimateTableCardinality(double selectivityFactor) {
-        // some code goes here
-        return 0;
+        return (int) selectivityFactor * this.numTuples;
     }
 
     /**
@@ -147,16 +248,23 @@ public class TableStats {
      *         predicate
      */
     public double estimateSelectivity(int field, Predicate.Op op, Field constant) {
-        // some code goes here
-        return 1.0;
+        TupleDesc tupleDesc = this.dbFile.getTupleDesc;
+        String fieldName = tupleDesc.getFieldName(field);
+
+        if(tupleDesc.getFieldType(field) == Type.INT_TYPE) {
+            IntHistogram intHist = intHistMap.get(fieldName);
+            return intHist.estimateSelectivity(op, constant.getValue());
+        } else {
+            StringHistogram strHist = strHistMap.get(fieldName);
+            return strHist.estimateSelectivity(op, constant.getValue());
+        }
     }
 
     /**
      * return the total number of tuples in this table
      * */
     public int totalTuples() {
-        // some code goes here
-        return 0;
+        return numTuples;
     }
 
 }
