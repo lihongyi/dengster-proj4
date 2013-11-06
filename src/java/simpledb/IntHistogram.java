@@ -81,10 +81,9 @@ public class IntHistogram {
     public double estimateSelectivity(Predicate.Op op, int v) {
 
     	// some code goes here
-        double retVal = 0.0;
+        double retVal = 0;
         switch (op) {
             case EQUALS: 
-                //do something
                 retVal = eqSelectivity(v);
                 break;
             case GREATER_THAN:
