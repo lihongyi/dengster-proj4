@@ -147,6 +147,8 @@ public class TableStats {
         
         dbIterator.close();
 
+        System.out.printf("Num of Tuples: %d", this.numTuples);
+
         dbIterator = dbFile.iterator(tid);
         this.intHistMap = new HashMap<String, IntHistogram>();
         this.strHistMap = new HashMap<String,StringHistogram>();
