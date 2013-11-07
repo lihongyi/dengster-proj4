@@ -113,7 +113,7 @@ public class TableStats {
 
                 if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
 
-                    IntField field =  (IntField) tuple.getField();
+                    IntField field =  (IntField) tuple.getField(i);
                     int fieldValue = field.getValue();
 
                     if (!(minMap.containsKey(fieldName) && maxMap.containsKey(fieldName))) {
@@ -145,7 +145,7 @@ public class TableStats {
         HashMap<String, StringHistogram> strHistMap = new HashMap<String,StringHistogram>();
         dbIterator.open();
 
-        while(dbIter.hasNext()) {
+        while(dbIterator.hasNext()) {
             Tuple tuple = dbIterator.next();
 
 
@@ -155,7 +155,7 @@ public class TableStats {
                 if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
 
                     IntField field =  (IntField) tuple.getField(i);
-                    int fieldValue = field.getValue();
+                    String fieldValue = field.getValue();
 
                     if(!intHistMap.containsKey(fieldName)) {
                         intHistMap.put(fieldName, new IntHistogram(NUM_HIST_BINS, minMap.get(fieldName), maxMap.get(fieldName)));
@@ -248,7 +248,7 @@ public class TableStats {
      *         predicate
      */
     public double estimateSelectivity(int field, Predicate.Op op, Field constant) {
-        TupleDesc tupleDesc = this.dbFile.getTupleDesc;
+        TupleDesc tupleDesc = this.dbFile.getTupleDesc();
         String fieldName = tupleDesc.getFieldName(field);
 
         if(tupleDesc.getFieldType(field) == Type.INT_TYPE) {
