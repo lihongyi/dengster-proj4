@@ -113,7 +113,7 @@ public class TableStats {
 
                 if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
 
-                    IntField field =  (IntField) tuple.getField;
+                    IntField field =  (IntField) tuple.getField();
                     int fieldValue = field.getValue();
 
                     if (!(minMap.containsKey(fieldName) && maxMap.containsKey(fieldName))) {
