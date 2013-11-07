@@ -89,6 +89,7 @@ public class TableStats {
         // in a single scan of the table.
         
         DbFile dbFile = Database.getCatalog().getDbFile(tableid);
+        this.dbFile = dbFile;
         TupleDesc tupleDesc = dbFile.getTupleDesc();
         TransactionId tid = new TransactionId();
         DbFileIterator dbIterator = dbFile.iterator(tid);
