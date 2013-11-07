@@ -143,7 +143,7 @@ public class TableStats {
         
         dbIterator.close();
 
-        dbIterator = dbFile.iterator(tid);
+        dbIterator = dbFile.iterator(null);
         this.intHistMap = new HashMap<String, IntHistogram>();
         this.strHistMap = new HashMap<String,StringHistogram>();
         
