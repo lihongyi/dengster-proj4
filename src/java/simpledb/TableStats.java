@@ -155,7 +155,7 @@ public class TableStats {
                 if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
 
                     IntField field =  (IntField) tuple.getField(i);
-                    String fieldValue = field.getValue();
+                    int fieldValue = (int) field.getValue();
 
                     if(!intHistMap.containsKey(fieldName)) {
                         intHistMap.put(fieldName, new IntHistogram(NUM_HIST_BINS, minMap.get(fieldName), maxMap.get(fieldName)));
@@ -169,7 +169,7 @@ public class TableStats {
                 } else {
 
                     StringField field = (StringField) tuple.getField(i);
-                    int fieldValue = field.getValue();
+                    String fieldValue = field.getValue();
 
                     if(!(strHistMap.containsKey(fieldName))) {
                         strHistMap.put(fieldName, new StringHistogram(NUM_HIST_BINS));
