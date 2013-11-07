@@ -145,7 +145,6 @@ public class TableStats {
         
         dbIterator.close();
 
-        tid = new TransactionId();
         dbIterator = dbFile.iterator(tid);
         this.intHistMap = new HashMap<String, IntHistogram>();
         this.strHistMap = new HashMap<String,StringHistogram>();
