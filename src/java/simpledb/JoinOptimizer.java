@@ -270,7 +270,7 @@ public class JoinOptimizer {
         PlanCache planCache = new PlanCache();
 
         /** Go through all the joins. */
-        for (int i =1; i < joins.size(); i++) {
+        for (int i =1; i <= joins.size(); i++) {
 
             /** Get subsets. */
             for (Set<LogicalJoinNode> s : this.enumerateSubsets(joins, i)) {
@@ -280,13 +280,20 @@ public class JoinOptimizer {
                 /** Now find best plan WITHIN the subset. */
                 for (LogicalJoinNode sPrime : s) {
 
-                    CostCard tempPlan = this.computeCostAndCardOfSubplan(stats, filterSelectivities, planCache, s, bestPlan.cost, sPrime);
-                    bestPlan = tempPlan.cost < bestPlan.cost ? tempPlan : bestPlan;
+                    CostCard tempPlan = this.computeCostAndCardOfSubplan(stats, filterSelectivities, sPrime, s, bestPlan.cost, planCache);
+                    if (tempPlan != null) {
+                        bestPlan = tempPlan.cost < bestPlan.cost ? tempPlan : bestPlan;   
+                        /** AND ADD THAT SHIT! */
+                        planCache.addPlan(s, bestPlan.cost, bestPlan.card, bestPlan.plan); 
+                    }
 
-                    /** AND ADD THAT SHIT! */
-                    planCache.add(s, bestPlan.cost, bestPlan.card, bestPlan.plan);
+
                 }
             }
+        }
+
+        if (explain) {
+            this.printJoins(joins, planCache, stats, filterSelectivities);
         }
         Set<LogicalJoinNode> s2 = new HashSet<LogicalJoinNode>();
         s2.addAll(joins);
