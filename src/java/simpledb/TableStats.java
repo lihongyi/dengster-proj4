@@ -110,7 +110,7 @@ public class TableStats {
 
             while(dbIterator.hasNext()) {
                 Tuple tuple = dbIterator.next();
-                numTuples++;
+                this.numTuples += 1;
 
                 for (int i = 0; i < tupleDesc.numFields(); i++) {
                     String fieldName = tupleDesc.getFieldName(i);
