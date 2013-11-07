@@ -115,7 +115,7 @@ public class TableStats {
                 for (int i = 0; i < tupleDesc.numFields(); i++) {
                     String fieldName = tupleDesc.getFieldName(i);
 
-                    if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
+                    if(tupleDesc.getFieldType(i).equals(Type.INT_TYPE)) {
 
                         IntField field =  (IntField) tuple.getField(i);
                         int fieldValue = field.getValue();
@@ -160,7 +160,7 @@ public class TableStats {
                 for (int i = 0; i < tupleDesc.numFields(); i++) {
                     String fieldName = tupleDesc.getFieldName(i);
 
-                    if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
+                    if(tupleDesc.getFieldType(i).equals(Type.INT_TYPE)) {
 
                         IntField field =  (IntField) tuple.getField(i);
                         int fieldValue = (int) field.getValue();
@@ -215,8 +215,7 @@ public class TableStats {
     public double estimateScanCost() {
         HeapFile hfDbFile = (HeapFile) this.dbFile;
         int numPages = hfDbFile.numPages();
-        double result = numPages * this.ioCostPerPage;
-        return result;
+        return numPages * this.ioCostPerPage;
     }
 
     /**
@@ -264,7 +263,7 @@ public class TableStats {
         TupleDesc tupleDesc = this.dbFile.getTupleDesc();
         String fieldName = tupleDesc.getFieldName(field);
 
-        if(tupleDesc.getFieldType(field) == Type.INT_TYPE) {
+        if(tupleDesc.getFieldType(field).equals(Type.INT_TYPE)) {
             IntField c = (IntField) constant;
             IntHistogram intHist = intHistMap.get(fieldName);
             return intHist.estimateSelectivity(op, c.getValue());
