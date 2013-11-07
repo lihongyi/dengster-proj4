@@ -94,14 +94,12 @@ public class TableStats {
         this.dbFile = dbFile;
         TupleDesc tupleDesc = dbFile.getTupleDesc();
         TransactionId tid = new TransactionId();
-        DbFileIterator dbIterator = dbFile.iterator(tid);
+        DbFileIterator dbIterator = dbFile.iterator(null);
 
         HashMap<String, Integer> minMap = new HashMap<String, Integer>();
 
         HashMap<String, Integer> maxMap = new HashMap<String, Integer>();
 
-
-        this.dbFile = dbFile; 
         this.ioCostPerPage = ioCostPerPage;
 
         try {
