@@ -139,6 +139,8 @@ public class TableStats {
             }
         } catch (DbException e) {
             System.out.printf("dbexception caught \n");
+        } catch (TransactionAbortedException e) {
+            System.out.printf("transactionabortedexception\n");
         }
         
         dbIterator.close();
@@ -190,6 +192,8 @@ public class TableStats {
             }
         } catch (DbException e) {
             System.out.printf("dbexception 2 \n");
+        } catch (TransactionAbortedException e) {
+            System.out.printf("transactionabortedexception 2\n");
         }
     
         dbIterator.close();
