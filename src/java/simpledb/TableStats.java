@@ -228,6 +228,7 @@ public class TableStats {
      *         selectivityFactor
      */
     public int estimateTableCardinality(double selectivityFactor) {
+        System.out.printf("numtuples = %d\n", this.numTuples);
         return (int) selectivityFactor * this.numTuples;
     }
 
