@@ -202,7 +202,8 @@ public class TableStats {
      * @return The estimated cost of scanning the table.
      */
     public double estimateScanCost() {
-        int numPages = this.dbFile.numPages();
+        HeapFile hfDbFile = (HeapFile) this.dbFile;
+        int numPages = hfDbFile.numPages();
         double result = numPages * this.ioCostPerPage;
         return result;
     }
@@ -249,7 +250,7 @@ public class TableStats {
      *         predicate
      */
     public double estimateSelectivity(int field, Predicate.Op op, Field constant) {
-        TupleDesc tupleDesc = (HeapFile) this.dbFile.getTupleDesc();
+        TupleDesc tupleDesc = this.dbFile.getTupleDesc();
         String fieldName = tupleDesc.getFieldName(field);
 
         if(tupleDesc.getFieldType(field) == Type.INT_TYPE) {
