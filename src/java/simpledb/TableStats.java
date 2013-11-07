@@ -12,11 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class is not needed in implementing proj1 and proj2.
  */
 public class TableStats {
-    private static int ioCostPerPage;
-    private static DbFile dbFile;
-    private static int numTuples = 0;
-    private static HashMap<String, IntHistogram> intHistMap;
-    private static HashMap<String, StringHistogram> strHistMap; 
+    private int ioCostPerPage;
+    private DbFile dbFile;
+    private int numTuples = 0;
+    private HashMap<String, IntHistogram> intHistMap;
+    private HashMap<String, StringHistogram> strHistMap; 
 
     private static final ConcurrentHashMap<String, TableStats> statsMap = new ConcurrentHashMap<String, TableStats>();
 
