@@ -59,7 +59,7 @@ public class IntHistogram {
         for (int i = 0; i < this.theHistogram.length; i++) {
             int left = min + this.bucketWidth*i;
             int right = min + this.bucketWidth*(i+1);
-            if (left <= v && v < right) {
+            if (left <= v && v < right) { /** AKA in the bucket. */
                 this.theHistogram[i] += 1;
                 this.numberTuples++; 
                 break;

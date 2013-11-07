@@ -111,6 +111,8 @@ public class JoinOptimizer {
             // HINT: You may need to use the variable "j" if you implemented
             // a join algorithm that's more complicated than a basic nested-loops
             // join.
+
+            /** Copying the algorithm line for line. */
             double retVal = 0;
             retVal = cost1 + ((double) card1 * cost2) + ((double) card1 * card2);
             return retVal;
@@ -158,6 +160,7 @@ public class JoinOptimizer {
             Map<String, Integer> tableAliasToId) {
         // some code goes here
         int card = 1;
+
         /** Join equality. */
         if (joinOp.equals(Predicate.Op.EQUALS)) {
             if (card1 > card2) {
@@ -177,10 +180,11 @@ public class JoinOptimizer {
             }
         } else {
             /** AKA range scans. This is basically everything 
-            /*  but EQUALS. In thise case, we follow the spec. */
+            /*  but EQUALS. In thise case, we follow the spec
+            /*  and multiply by 30%. */
             card = (int) (card1 * card2 * 0.3);
         }
-        //System.out.println("Card: " + card);
+
         return card <= 0 ? 1 : card;
     }
 
@@ -264,8 +268,29 @@ public class JoinOptimizer {
         //Replace the following
 
         PlanCache planCache = new PlanCache();
-        
-        return joins;
+
+        /** Go through all the joins. */
+        for (int i =1; i < joins.size(); i++) {
+
+            /** Get subsets. */
+            for (Set<LogicalJoinNode> s : this.enumerateSubsets(joins, i)) {
+                CostCard bestPlan = new CostCard();
+                bestPlan.cost = Double.MAX_VALUE;
+
+                /** Now find best plan WITHIN the subset. */
+                for (LogicalJoinNode sPrime : s) {
+
+                    CostCard tempPlan = this.computeCostAndCardOfSubplan(stats, filterSelectivities, planCache, s, bestPlan.cost, sPrime);
+                    bestPlan = tempPlan.cost < bestPlan.cost ? tempPlan : bestPlan;
+
+                    /** AND ADD THAT SHIT! */
+                    planCache.add(s, bestPlan.cost, bestPlan.card, bestPlan.plan);
+                }
+            }
+        }
+        Set<LogicalJoinNode> s2 = new HashSet<LogicalJoinNode>();
+        s2.addAll(joins);
+        return planCache.getOrder(s2);
     }
 
     // ===================== Private Methods =================================
