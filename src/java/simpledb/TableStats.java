@@ -249,7 +249,7 @@ public class TableStats {
      *         predicate
      */
     public double estimateSelectivity(int field, Predicate.Op op, Field constant) {
-        TupleDesc tupleDesc = this.dbFile.getTupleDesc();
+        TupleDesc tupleDesc = (HeapFile) this.dbFile.getTupleDesc();
         String fieldName = tupleDesc.getFieldName(field);
 
         if(tupleDesc.getFieldType(field) == Type.INT_TYPE) {
