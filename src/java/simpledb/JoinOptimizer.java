@@ -111,7 +111,9 @@ public class JoinOptimizer {
             // HINT: You may need to use the variable "j" if you implemented
             // a join algorithm that's more complicated than a basic nested-loops
             // join.
-            return -1.0;
+            double retVal = 0;
+            retVal = cost1 + ((double) card1 * cost2) + ((double) card1 * card2);
+            return retVal;
         }
     }
 
@@ -154,8 +156,31 @@ public class JoinOptimizer {
             String field2PureName, int card1, int card2, boolean t1pkey,
             boolean t2pkey, Map<String, TableStats> stats,
             Map<String, Integer> tableAliasToId) {
-        int card = 1;
         // some code goes here
+        int card = 1;
+        /** Join equality. */
+        if (joinOp.equals(Predicate.Op.EQUALS)) {
+            if (card1 > card2) {
+                card = card1;
+
+                /** If first key is primary key AND it's bigger than card2, we have to re-assign per the spec. */
+                if (t1pkey && (card > card2)) {
+                    card = card2;
+                }
+            } else {
+                card = card2;
+
+                /** See previous comment for explanation. */
+                if (t2pkey && (card > card1)) {
+                    card = card1;
+                }
+            }
+        } else {
+            /** AKA range scans. This is basically everything 
+            /*  but EQUALS. In thise case, we follow the spec. */
+            card = (int) (card1 * card2 * 0.3);
+        }
+        //System.out.println("Card: " + card);
         return card <= 0 ? 1 : card;
     }
 
