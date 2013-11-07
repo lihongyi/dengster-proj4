@@ -109,7 +109,6 @@ public class TableStats {
             while(dbIterator.hasNext()) {
                 Tuple tuple = dbIterator.next();
                 this.numTuples += 1;
-                System.out.printf("numTuples in loop =%d", this.numTuples);
 
                 for (int i = 0; i < tupleDesc.numFields(); i++) {
                     String fieldName = tupleDesc.getFieldName(i);
