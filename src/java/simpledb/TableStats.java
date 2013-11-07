@@ -94,7 +94,7 @@ public class TableStats {
         this.dbFile = dbFile;
         TupleDesc tupleDesc = dbFile.getTupleDesc();
         TransactionId tid = new TransactionId();
-        DbFileIterator dbIterator = dbFile.iterator(null);
+        DbFileIterator dbIterator = dbFile.iterator(tid);
 
         HashMap<String, Integer> minMap = new HashMap<String, Integer>();
 
@@ -118,20 +118,24 @@ public class TableStats {
                         IntField field =  (IntField) tuple.getField(i);
                         int fieldValue = field.getValue();
 
-                        if (!(minMap.containsKey(fieldName) && maxMap.containsKey(fieldName))) {
+                        if (!minMap.containsKey(fieldName)) {
                             minMap.put(fieldName, fieldValue);
-                            maxMap.put(fieldName, fieldValue);
+                     
                         } else {
 
                             if (fieldValue <  minMap.get(fieldName)) {
                                 minMap.put(fieldName, fieldValue);
                             }
 
-                            if (fieldValue > maxMap.get(fieldName)) {
-                                maxMap.put(fieldName, fieldValue);
-                            }
                         }
 
+                        if (!maxMap.containsKey(fieldName)) {
+                                maxMap.put(fieldName, fieldValue);
+                        } else {
+                            if (fieldValue > maxMap.get(fieldName)) {
+                                    maxMap.put(fieldName, fieldValue);
+                            }
+                        }
                     }
                 }
             }
@@ -143,7 +147,7 @@ public class TableStats {
         
         dbIterator.close();
 
-        dbIterator = dbFile.iterator(null);
+        dbIterator = dbFile.iterator(tid);
         this.intHistMap = new HashMap<String, IntHistogram>();
         this.strHistMap = new HashMap<String,StringHistogram>();
         
