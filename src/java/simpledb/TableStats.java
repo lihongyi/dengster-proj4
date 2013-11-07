@@ -256,11 +256,13 @@ public class TableStats {
         String fieldName = tupleDesc.getFieldName(field);
 
         if(tupleDesc.getFieldType(field) == Type.INT_TYPE) {
+            IntField c = (IntField) constant;
             IntHistogram intHist = intHistMap.get(fieldName);
-            return intHist.estimateSelectivity(op, (IntField) constant.getValue());
+            return intHist.estimateSelectivity(op, c.getValue());
         } else {
+            StringField c = (StringField) constant;
             StringHistogram strHist = strHistMap.get(fieldName);
-            return strHist.estimateSelectivity(op, (StringField) constant.getValue());
+            return strHist.estimateSelectivity(op, c.getValue());
         }
     }
 
