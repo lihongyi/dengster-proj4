@@ -257,10 +257,10 @@ public class TableStats {
 
         if(tupleDesc.getFieldType(field) == Type.INT_TYPE) {
             IntHistogram intHist = intHistMap.get(fieldName);
-            return intHist.estimateSelectivity(op, constant.getValue());
+            return intHist.estimateSelectivity(op, (IntField) constant.getValue());
         } else {
             StringHistogram strHist = strHistMap.get(fieldName);
-            return strHist.estimateSelectivity(op, constant.getValue());
+            return strHist.estimateSelectivity(op, (StringField) constant.getValue());
         }
     }
 
