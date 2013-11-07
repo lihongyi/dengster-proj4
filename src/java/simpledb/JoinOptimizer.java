@@ -194,6 +194,9 @@ public class JoinOptimizer {
      *            The size of the subsets of interest
      * @return a set of all subsets of the specified size
      */
+
+
+
     @SuppressWarnings("unchecked")
     public <T> Set<Set<T>> enumerateSubsets(Vector<T> v, int size) {
         Set<Set<T>> els = new HashSet<Set<T>>();
@@ -216,6 +219,18 @@ public class JoinOptimizer {
         return els;
 
     }
+
+    // 1. j = set of join nodes
+    // 2. for (i in 1...|j|):  // First find best plan for single join, then for two joins, etc. 
+    // 3.     for s in {all length i subsets of j} // Looking at a concrete subset of joins
+    // 4.       bestPlan = {}  // We want to find the best plan for this concrete subset 
+    // 5.       for s' in {all length i-1 subsets of s} 
+    // 6.            subplan = optjoin(s')  // Look-up in the cache the best query plan for s but with one relation missing
+    // 7.            plan = best way to join (s-s') to subplan // Now find the best plan to extend s' by one join to get s
+    // 8.            if (cost(plan) < cost(bestPlan))
+    // 9.               bestPlan = plan // Update the best plan for computing s
+    // 10.      optjoin(s) = bestPlan
+    // 11. return optjoin(j)
 
     /**
      * Compute a logical, reasonably efficient join on the specified tables. See
@@ -247,6 +262,9 @@ public class JoinOptimizer {
 
         // some code goes here
         //Replace the following
+
+        PlanCache planCache = new PlanCache();
+        
         return joins;
     }
 
