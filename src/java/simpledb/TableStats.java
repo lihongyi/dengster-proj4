@@ -104,92 +104,97 @@ public class TableStats {
         this.dbFile = dbFile; 
         this.ioCostPerPage = ioCostPerPage;
 
+        try {
 
-        dbIterator.open();
+            dbIterator.open();
 
-        while(dbIterator.hasNext()) {
-            Tuple tuple = dbIterator.next();
-            numTuples++;
+            while(dbIterator.hasNext()) {
+                Tuple tuple = dbIterator.next();
+                numTuples++;
 
-            for (int i = 0; i < tupleDesc.numFields(); i++) {
-                String fieldName = tupleDesc.getFieldName(i);
+                for (int i = 0; i < tupleDesc.numFields(); i++) {
+                    String fieldName = tupleDesc.getFieldName(i);
 
-                if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
+                    if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
 
-                    IntField field =  (IntField) tuple.getField(i);
-                    int fieldValue = field.getValue();
+                        IntField field =  (IntField) tuple.getField(i);
+                        int fieldValue = field.getValue();
 
-                    if (!(minMap.containsKey(fieldName) && maxMap.containsKey(fieldName))) {
-                        minMap.put(fieldName, fieldValue);
-                        maxMap.put(fieldName, fieldValue);
-                    } else {
-
-                        if (fieldValue <  minMap.get(fieldName)) {
+                        if (!(minMap.containsKey(fieldName) && maxMap.containsKey(fieldName))) {
                             minMap.put(fieldName, fieldValue);
-                        }
-
-                        if (fieldValue > maxMap.get(fieldName)) {
                             maxMap.put(fieldName, fieldValue);
-                        }
-                    }
+                        } else {
 
+                            if (fieldValue <  minMap.get(fieldName)) {
+                                minMap.put(fieldName, fieldValue);
+                            }
+
+                            if (fieldValue > maxMap.get(fieldName)) {
+                                maxMap.put(fieldName, fieldValue);
+                            }
+                        }
+
+                    }
                 }
             }
-
-            dbIterator.close();
-
+        } catch (DbException e) {
+            System.out.printf("dbexception caught \n");
         }
-
-
+        
+        dbIterator.close();
 
         tid = new TransactionId();
         dbIterator = dbFile.iterator(tid);
         this.intHistMap = new HashMap<String, IntHistogram>();
         this.strHistMap = new HashMap<String,StringHistogram>();
-        dbIterator.open();
+        
+        try {
+            dbIterator.open();
 
-        while(dbIterator.hasNext()) {
-            Tuple tuple = dbIterator.next();
+            while(dbIterator.hasNext()) {
+                Tuple tuple = dbIterator.next();
 
 
-            for (int i = 0; i < tupleDesc.numFields(); i++) {
-                String fieldName = tupleDesc.getFieldName(i);
+                for (int i = 0; i < tupleDesc.numFields(); i++) {
+                    String fieldName = tupleDesc.getFieldName(i);
 
-                if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
+                    if(tupleDesc.getFieldType(i) == Type.INT_TYPE) {
 
-                    IntField field =  (IntField) tuple.getField(i);
-                    int fieldValue = (int) field.getValue();
+                        IntField field =  (IntField) tuple.getField(i);
+                        int fieldValue = (int) field.getValue();
 
-                    if(!intHistMap.containsKey(fieldName)) {
-                        intHistMap.put(fieldName, new IntHistogram(NUM_HIST_BINS, minMap.get(fieldName), maxMap.get(fieldName)));
+                        if(!intHistMap.containsKey(fieldName)) {
+                            intHistMap.put(fieldName, new IntHistogram(NUM_HIST_BINS, minMap.get(fieldName), maxMap.get(fieldName)));
+                        }
+
+                        IntHistogram intHist = intHistMap.get(fieldName);
+                        intHist.addValue(fieldValue);
+                        intHistMap.put(fieldName, intHist);
+
+
+                    } else {
+
+                        StringField field = (StringField) tuple.getField(i);
+                        String fieldValue = field.getValue();
+
+                        if(!(strHistMap.containsKey(fieldName))) {
+                            strHistMap.put(fieldName, new StringHistogram(NUM_HIST_BINS));
+                        }
+                        StringHistogram strHist = strHistMap.get(fieldName);
+                        strHist.addValue(fieldValue);
+                        strHistMap.put(fieldName, strHist);
+
                     }
-
-                    IntHistogram intHist = intHistMap.get(fieldName);
-                    intHist.addValue(fieldValue);
-                    intHistMap.put(fieldName, intHist);
-
-
-                } else {
-
-                    StringField field = (StringField) tuple.getField(i);
-                    String fieldValue = field.getValue();
-
-                    if(!(strHistMap.containsKey(fieldName))) {
-                        strHistMap.put(fieldName, new StringHistogram(NUM_HIST_BINS));
-                    }
-                    StringHistogram strHist = strHistMap.get(fieldName);
-                    strHist.addValue(fieldValue);
-                    strHistMap.put(fieldName, strHist);
 
                 }
-
             }
+        } catch (DbException e) {
+            System.out.printf("dbexception 2 \n");
         }
-
+    
         dbIterator.close();
 
-
-    }
+    }   
 
     /**
      * Estimates the cost of sequentially scanning the file, given that the cost
