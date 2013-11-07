@@ -15,6 +15,8 @@ public class TableStats {
     private static int ioCostPerPage;
     private static DbFile dbFile;
     private static int numTuples = 0;
+    private static HashMap<String, IntHistogram> intHistMap;
+    private static HashMap<String, StringHistogram> strHistMap; 
 
     private static final ConcurrentHashMap<String, TableStats> statsMap = new ConcurrentHashMap<String, TableStats>();
 
@@ -142,8 +144,8 @@ public class TableStats {
 
         tid = new TransactionId();
         dbIterator = dbFile.iterator(tid);
-        HashMap<String, IntHistogram> intHistMap = new HashMap<String, IntHistogram>();
-        HashMap<String, StringHistogram> strHistMap = new HashMap<String,StringHistogram>();
+        this.intHistMap = new HashMap<String, IntHistogram>();
+        this.strHistMap = new HashMap<String,StringHistogram>();
         dbIterator.open();
 
         while(dbIterator.hasNext()) {
