@@ -463,27 +463,22 @@ public class BufferPool {
         }
         
         while (!isEvicted) {
-            Iterator<PageId> queueIter = this.myQueue.iterator();
-            PageId pid;
-            if (queueIter.hasNext()) {
-                pid = queueIter.next();
-            } else {
-                throw new DbException("could not find clean page to evict");
-            }
+            Page p;
+            for (int i = 0; i < myQueue.size(); i++) {
+                PageId pid = myQueue.get(i);
+                if (myPages.get(pid).isDirty == null) {
+                    try {
+                        flushPage(pid);
+                        myPages.remove(pid);
+                        isEvicted = true;
+                        break;                    
+                    } catch (IOException e) {
+                        System.out.println("Exception Thrown:" + e.getMessage());
+                    }
 
-            Page p = myPages.get(pid);
-           
-            if (p.isDirty() == null) {
-                try {
-                    flushPage(pid);
-                    myPages.remove(pid);
-                    isEvicted = true;
-                    break;                    
-                } catch (IOException e) {
-                    System.out.println("Exception Thrown:" + e.getMessage());
                 }
             }
-   
+                   
         }
     }
 
