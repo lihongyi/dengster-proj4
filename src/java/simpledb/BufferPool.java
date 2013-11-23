@@ -257,8 +257,7 @@ public class BufferPool {
      * @param tid the ID of the transaction requesting the unlock
      */
     public void transactionComplete(TransactionId tid) throws IOException {
-        // some code goes here
-        // not necessary for proj1
+        transactionComplete(tid, true);
     }
 
     /** Return true if the specified transaction has a lock on the specified page */
@@ -279,10 +278,29 @@ public class BufferPool {
      */
     public void transactionComplete(TransactionId tid, boolean commit)
         throws IOException {
-        // some code goes here
-        // not necessary for proj1
-    }
+        Collection<Page> pages = myPages.values();
+        if (commit) {
+            for (Page p : pages) {
+                if (p.isDirty() == null) {
+                    p.setBeforeImage();
+                } else {
+                    if (p.isDirty().equals(tid)) {
+                        flushPage(p.getId());
+                    }
+                }
+            }
+        } else {
+            for (Page p : pages) {  
+                if (p.isDirty() != null && p.isDirty().equals(tid)) {
+                    PageId pid = p.getId();
+                    Page beforeImage = p.getBeforeImage();
+                    myPages.put(pid, beforeImage);
+                }
+            }
+        }
+     //release all locks
 
+    }
     /**
      * Add a tuple to the specified table behalf of transaction tid.  Will
      * acquire a write lock on the page the tuple is added to(Lock 
@@ -403,22 +421,42 @@ public class BufferPool {
     private synchronized  void evictPage() throws DbException {
         // some code goes here
         // not necessary for proj1
-        /** Old random stuff. 
-        int keySetSize = this.myPages.size();
-        int toRemove = new Random().nextInt(keySetSize);
-        int counter = 0;
-        PageId remove = null;
-        for (PageId p : this.myPages.keySet()) {
-            if (counter == toRemove) {
-                remove = p;
-            }
-            counter++;
-        }
 
-        End random stuff. */
-        PageId remove = null;
-        remove = this.myQueue.get(0);
-        this.discardPage(remove);    
+        boolean isAllDirty = true;
+        boolean isEvicted = false;
+        Collection<Page> allPagesValue = myPages.values();
+        while (isAllDirty) {
+            for (Page p : allPagesValue) {
+                if (p.isDirty() == null) {
+                    isAllDirty = false;
+                    break;
+                }
+            }
+        
+            if (isAllDirty) {
+                throw new DbException("all dirty.");
+            }
+        }
+        
+        while (!isEvicted) {
+            Iterator<PageId> queueIter = this.myQueue.iterator();
+            if (queueIter.hasNext()) {
+                PageId pid = queueIter.hasNext();
+            } else {
+                throw new DbException("could not find clean page to evict");
+            }
+
+            Page p = myPages.get(pid);
+           
+            if (p.isDirty() == null) {
+                flushPage(pid);
+                myPages.remove(pid);
+                isEvicted = true;
+                break;
+            }
+   
+        }
     }
 
 }
+
