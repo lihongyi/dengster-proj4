@@ -58,9 +58,9 @@ public class BufferPool {
         throws TransactionAbortedException, DbException {
         // some code goes here
 
-        boolean freeLock = myLock.setLock(tid, pid, perm);
+        boolean freeLock = myLock.getLock(pid, tid, perm);
         while (!freeLock) {
-            freeLock = myLock.setLock(tid, pid, perm)
+            freeLock = myLock.getLock(pid, tid, perm);
         }
         if (myPages.containsKey(pid)) {
 
@@ -87,8 +87,8 @@ public class BufferPool {
 
         private Hashtable<PageId, ArrayList<TransactionId>> pageToTransactionShared;
         private Hashtable<PageId, TransactionId> pageToTransactionExclusive;
-        private Hashtable<TransactionId, ArrayList<PageId>> transationToPageShared;
-        private Hashtaable<TransactionId, ArrayList<PageID>> transactionToPageExclusive;
+        private Hashtable<TransactionId, ArrayList<PageId>> transactionToPageShared;
+        private Hashtable<TransactionId, ArrayList<PageId>> transactionToPageExclusive;
 
         public theLock() {
             pageToTransactionExclusive = new Hashtable<PageId, TransactionId>();
@@ -171,9 +171,9 @@ public class BufferPool {
                     if (!sharedT.contains(t)) {
                         sharedT.add(t);
                     }
-                    pageToTransactionShared.put(t, sharedT)
+                    pageToTransactionShared.put(p, sharedT);
 
-                    ArrayList<PageId> transactionToPageArrayList = transationToPageShared.get(t);
+                    ArrayList<PageId> transactionToPageArrayList = transactionToPageShared.get(t);
                     if (transactionToPageArrayList == null) {
                         transactionToPageArrayList = new ArrayList<PageId>();
                     }
@@ -187,6 +187,7 @@ public class BufferPool {
                     return isValid;
 
                 } else {
+                    isValid = false;
                     return isValid;
                 }
             }
@@ -218,7 +219,7 @@ public class BufferPool {
         }
 
         public synchronized boolean holdsLock(TransactionId t, PageId p) {
-            TransactionId exclusiveT = pageToTransactionExclusive(p);
+            TransactionId exclusiveT = pageToTransactionExclusive.get(p);
             if (exclusiveT != null && exclusiveT.equals(t)) {
                 return true;
             }
@@ -247,7 +248,7 @@ public class BufferPool {
     public  void releasePage(TransactionId tid, PageId pid) {
         // some code goes here
         // not necessary for proj1
-        self.theLock.releasePage(tid, pid);
+        myLock.releasePage(tid, pid);
     }
 
     /**
@@ -265,7 +266,7 @@ public class BufferPool {
         // some code goes here
         // not necessary for proj1
         boolean retVal;
-        retVal = theLock.holdsLock(tid, p);
+        retVal = myLock.holdsLock(tid, p);
         return retVal;
     }
 
