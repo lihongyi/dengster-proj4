@@ -499,7 +499,7 @@ public class BufferPool {
             }
         }
         
-        if(allDirty && pageCount == capacity){
+        if(allDirty && pageCount == this.maxPages){
             throw new DbException("all pages in BufferPool are dirty. Cannot evict.");
         }
        
