@@ -327,7 +327,7 @@ public class BufferPool {
            // flush dirty pages associated to the transaction to disk
            // flushPages(tid);
          //flush dirty pages associated to the transaction to disk
-            Collection<Page> allPages = BPoolPageMap.values();
+            Collection<Page> allPages = myPages.values();
             for(Page p : allPages){
                 if(p.isDirty() != null && p.isDirty().equals(tid)){
                     
@@ -343,11 +343,11 @@ public class BufferPool {
                 }
             }
                     
-           lockManager.releaseAllLocks(tid);
+           myLock.releaseAllLocks(tid);
        } else {
            //aborted
            //revert any changes made by the transaction by restoring the page to its on-disk state. 
-           Collection<Page> p = BPoolPageMap.values();
+           Collection<Page> p = myPages.values();
            for(Page page : p){
                if(page.isDirty() != null && page.isDirty().equals(tid)){
                    PageId pid = page.getId();
@@ -357,7 +357,7 @@ public class BufferPool {
                    
                }
            }
-           lockManager.releaseAllLocks(tid);
+           myLock.releaseAllLocks(tid);
        }
     }
     /**
