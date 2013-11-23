@@ -440,91 +440,44 @@ public class BufferPool {
      * Discards a page from the buffer pool.
      * Flushes the page to disk to ensure dirty pages are updated on disk.
      */
-    // private synchronized  void evictPage() throws DbException {
-    //     // some code goes here
-    //     // not necessary for proj1
+    private synchronized  void evictPage() throws DbException {
+        // some code goes here
+        // not necessary for proj1
 
-    //     boolean isAllDirty = true;
-    //     boolean isEvicted = false;
-    //     Collection<Page> allPagesValue = myPages.values();
-    //     while (isAllDirty) {
-    //         for (Page p : allPagesValue) {
-    //             if (p.isDirty() == null) {
-    //                 isAllDirty = false;
-    //                 break;
-    //             }
-    //         }
+        boolean isAllDirty = true;
+        boolean isEvicted = false;
+        Collection<Page> allPagesValue = myPages.values();
+        while (isAllDirty) {
+            for (Page p : allPagesValue) {
+                if (p.isDirty() == null) {
+                    isAllDirty = false;
+                    break;
+                }
+            }
         
-    //         if (isAllDirty) {
-    //             throw new DbException("all dirty.");
-    //         }
-    //     }
-        
-    //     while (!isEvicted) {
-    //         for (int i = 0; i < myQueue.size(); i++) {
-    //             PageId pid = myQueue.get(i);
-    //             if (myPages.get(pid).isDirty() == null) {
-    //                 try {
-    //                     flushPage(pid);
-    //                     myPages.remove(pid);
-    //                     myQueue.remove(i);
-    //                     isEvicted = true;
-    //                     break;                    
-    //                 } catch (IOException e) {
-    //                     System.out.println("Exception Thrown:" + e.getMessage());
-    //                 }
-
-    //             }
-    //         }
-                   
-    //     }
-    // }
-
-       private synchronized  void evictPage() throws DbException {
-       Set<PageId> bufferpoolPIDs = myPages.keySet();
-       List<PageId> pidList = new ArrayList<PageId>(bufferpoolPIDs);
-       
-       boolean evicted = false;
-        // check if all the pages are dirty
-        boolean allDirty = true;
-        int pageCount = 0;
-        Collection<Page> allPages = myPages.values();
-        for(Page p: allPages){
-            if(p.isDirty() == null){
-                // at least one non dirty page exists
-                allDirty = false;
-                break;
-            } else {
-                pageCount++;
+            if (isAllDirty) {
+                throw new DbException("all dirty.");
             }
         }
         
-        if(allDirty && pageCount == this.maxPages){
-            throw new DbException("all pages in BufferPool are dirty. Cannot evict.");
+        while (!isEvicted) {
+            for (int i = 0; i < myQueue.size(); i++) {
+                PageId pid = myQueue.get(i);
+                if (myPages.get(pid).isDirty() == null) {
+                    try {
+                        flushPage(pid);
+                        myPages.remove(pid);
+                        myQueue.remove(i);
+                        isEvicted = true;
+                        break;                    
+                    } catch (IOException e) {
+                        System.out.println("Exception Thrown:" + e.getMessage());
+                    }
+
+                }
+            }
+                   
         }
-       
-       while(!evicted){
-           // pick a random page ID from pages in bufferPool to evict
-           Random randomGenerator = new Random();
-           int randomInt = randomGenerator.nextInt(pidList.size());
-           
-           PageId pageIdToEvict = pidList.get(randomInt);
-           Page pageToChk = myPages.get(pageIdToEvict);
-           
-           // check if a transaction has written data to the page
-           // for NO STEAL
-           if(pageToChk.isDirty() == null){
-               try {
-                   flushPage(pageIdToEvict);
-                   myPages.remove(pageIdToEvict);
-                   evicted = true;
-               } catch (IOException e) {
-                   System.out.println(e.getMessage());
-                   e.printStackTrace();
-               }
-               
-           }
-       }
     }
 
 }
