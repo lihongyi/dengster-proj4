@@ -353,7 +353,7 @@ public class BufferPool {
                    PageId pid = page.getId();
                    //page.setBeforeImage();
                    Page oldPage = page.getBeforeImage();
-                   BPoolPageMap.put(pid, oldPage);
+                   myPages.put(pid, oldPage);
                    
                }
            }
