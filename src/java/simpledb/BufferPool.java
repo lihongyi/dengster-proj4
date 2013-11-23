@@ -301,64 +301,29 @@ public class BufferPool {
      */
     public void transactionComplete(TransactionId tid, boolean commit)
         throws IOException {
-        // Collection<Page> pages = myPages.values();
-        // if (commit) {
-        //     for (Page p : pages) {
-        //         if (p.isDirty() == null) {
-        //             p.setBeforeImage();
-        //         } else {
-        //             if (p.isDirty().equals(tid)) {
-        //                 flushPage(p.getId());
-        //             }
-        //         }
-        //     }
-        // } else {
-        //     for (Page p : pages) {  
-        //         if (p.isDirty() != null && p.isDirty().equals(tid)) {
-        //             PageId pid = p.getId();
-        //             Page beforeImage = p.getBeforeImage();
-        //             myPages.put(pid, beforeImage);
-        //         }
-        //     }
-        // }
-        // myLock.releaseAllLocks(tid);
-
-            if(commit){
-           // flush dirty pages associated to the transaction to disk
-           // flushPages(tid);
-         //flush dirty pages associated to the transaction to disk
-            Collection<Page> allPages = myPages.values();
-            for(Page p : allPages){
-                if(p.isDirty() != null && p.isDirty().equals(tid)){
-                    
-                    flushPage(p.getId());
-                    // use current page contents as the before-image
-                    // for the next transaction that modifies this page.
+        Collection<Page> pages = myPages.values();
+        if (commit) {
+            for (Page p : pages) {
+                if (p.isDirty() == null) {
                     p.setBeforeImage();
-                    
-                }
-                if(p.isDirty() == null){
-                    p.setBeforeImage();
-                    
+                } else {
+                    if (p.isDirty().equals(tid)) {
+                        flushPage(p.getId());
+                    }
                 }
             }
-                    
-           myLock.releaseAllLocks(tid);
-       } else {
-           //aborted
-           //revert any changes made by the transaction by restoring the page to its on-disk state. 
-           Collection<Page> p = myPages.values();
-           for(Page page : p){
-               if(page.isDirty() != null && page.isDirty().equals(tid)){
-                   PageId pid = page.getId();
-                   //page.setBeforeImage();
-                   Page oldPage = page.getBeforeImage();
-                   myPages.put(pid, oldPage);
-                   
-               }
-           }
-           myLock.releaseAllLocks(tid);
-       }
+        } else {
+            for (Page p : pages) {  
+                if (p.isDirty() != null && p.isDirty().equals(tid)) {
+                    PageId pid = p.getId();
+                    Page beforeImage = p.getBeforeImage();
+                    myPages.put(pid, beforeImage);
+                }
+            }
+        }
+        myLock.releaseAllLocks(tid);
+
+        
     }
     /**
      * Add a tuple to the specified table behalf of transaction tid.  Will
