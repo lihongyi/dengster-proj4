@@ -98,8 +98,8 @@ public class BufferPool {
         }
 
         public synchronized void releaseAllLocks(TransactionId t) {
-            for (pid : pageToTransactionShared.keySet()) {
-                ArrayList<TranasctionId> sharedTransactions = pageToTransactionShared.get(pid);
+            for (PageId pid : pageToTransactionShared.keySet()) {
+                ArrayList<TransactionId> sharedTransactions = pageToTransactionShared.get(pid);
                 if (sharedTransactions != null) {
                     if (sharedTransactions.contains(t)) {
                         sharedTransactions.remove(t);
