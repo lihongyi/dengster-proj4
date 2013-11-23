@@ -107,6 +107,17 @@ public class BufferPool {
                     pageToTransactionShared.put(pid, sharedTransactions);
                 }
             }
+            ArrayList<PageId> pagesToRemove = new ArrayList<PageId>();
+            for (PageId pid : pageToTransactionExclusive.keySet()) {
+                TransactionId t1 = pageToTransactionExclusive.get(pid);
+                if (t1 != null && t1.equals(t)) {
+                    pagesToRemove.add(pid);
+                }
+            }
+            transactionToPageExclusive.remove(t);
+            for (PageId p : pagesToRemove) {
+                pageToTransactionExclusive.remove(p);
+            }
         }
 
         public synchronized boolean getLock(PageId p, TransactionId t, Permissions perm) {
