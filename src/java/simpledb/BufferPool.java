@@ -466,7 +466,7 @@ public class BufferPool {
             Page p;
             for (int i = 0; i < myQueue.size(); i++) {
                 PageId pid = myQueue.get(i);
-                if (myPages.get(pid).isDirty == null) {
+                if (myPages.get(pid).isDirty() == null) {
                     try {
                         flushPage(pid);
                         myPages.remove(pid);
