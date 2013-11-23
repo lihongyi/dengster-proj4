@@ -440,8 +440,9 @@ public class BufferPool {
         
         while (!isEvicted) {
             Iterator<PageId> queueIter = this.myQueue.iterator();
+            PageId pid;
             if (queueIter.hasNext()) {
-                PageId pid = queueIter.next();
+                pid = queueIter.next();
             } else {
                 throw new DbException("could not find clean page to evict");
             }
