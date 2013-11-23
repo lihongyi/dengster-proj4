@@ -463,7 +463,6 @@ public class BufferPool {
         }
         
         while (!isEvicted) {
-            Page p;
             for (int i = 0; i < myQueue.size(); i++) {
                 PageId pid = myQueue.get(i);
                 if (myPages.get(pid).isDirty() == null) {
@@ -478,6 +477,7 @@ public class BufferPool {
 
                 }
             }
+            break;
                    
         }
     }
