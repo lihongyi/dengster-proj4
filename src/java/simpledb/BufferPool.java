@@ -24,6 +24,7 @@ public class BufferPool {
     private HashMap<PageId, Page> myPages;
     private int maxPages;
     private ArrayList<PageId> myQueue;
+    private theLock myLock;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -35,6 +36,7 @@ public class BufferPool {
         maxPages = numPages;
         myPages = new HashMap<PageId, Page>();
         myQueue = new ArrayList<PageId>();
+        myLock = new theLock();
     }
 
     /**
@@ -56,7 +58,10 @@ public class BufferPool {
         throws TransactionAbortedException, DbException {
         // some code goes here
 
-
+        boolean freeLock = myLock.setLock(tid, pid, perm);
+        while (!freeLock) {
+            freeLock = myLock.setLock(tid, pid, perm)
+        }
         if (myPages.containsKey(pid)) {
 
             if (this.myQueue.remove(pid)) {
@@ -78,6 +83,158 @@ public class BufferPool {
         }
     }
 
+    public class theLock {
+
+        private Hashtable<PageId, ArrayList<TransactionId>> pageToTransactionShared;
+        private Hashtable<PageId, TransactionId> pageToTransactionExclusive;
+        private Hashtable<TransactionId, ArrayList<PageId>> transationToPageShared;
+        private Hashtaable<TransactionId, ArrayList<PageID>> transactionToPageExclusive;
+
+        public theLock() {
+            pageToTransactionExclusive = new Hashtable<PageId, TransactionId>();
+            pageToTransactionShared = new Hashtable<PageId, ArrayList<TransactionId>>();
+            transactionToPageShared = new Hashtable<TransactionId, ArrayList<PageId>>();
+            transactionToPageExclusive = new Hashtable<TransactionId, ArrayList<PageId>>();
+        }
+
+        public synchronized boolean getLock(PageId p, TransactionId t, Permissions perm) {
+
+            ArrayList<TransactionId> sharedT = pageToTransactionShared.get(p);
+            TransactionId exclusiveT = pageToTransactionExclusive.get(p);
+
+            boolean isValid = true;
+            boolean usedSharedLock = false;
+            boolean usedExclusiveLock = false;
+
+            /** Checks to see if transactions have a shared lock on this page. */
+            if (sharedT != null) {
+                usedSharedLock = true;
+            }
+
+            /** Checks to see if a transaction has an exclusive lock on this page. */
+            if (exclusiveT != null) {
+                usedExclusiveLock = true;
+            }
+
+            if (perm.equals(Permissions.READ_WRITE)) {
+
+
+                /** If transactions have a shared lock on this page. */
+                if (usedSharedLock) {
+
+                    /** Can't get exclusive lock because more than one transaction
+                    /*  has control of the shared lock .*/
+                    if (sharedT.size() > 1) {
+                        isValid = false;
+                        return isValid;
+                    }
+
+                    /** The other edge case is that only one transaction has a shared
+                    /*  on this page. However, we have to make sure that said tranaction
+                    /*  is actually OUR transaction. If not, BOOT. */
+                    if (sharedT.size() == 1 && !sharedT.contains(t)) {
+                        isValid = false;
+                        return isValid;
+                    }
+                }
+
+                /** If a transaction does have an exclusive lock, make sure that
+                /*  that transaction is OUR transaction. If not, BOOT. */
+                if (usedExclusiveLock && !exclusiveT.equals(t)) {
+                    isValid = false;
+                    return isValid;
+                } else { /** AKA we are clear! */
+                    isValid = true;
+
+                    pageToTransactionExclusive.put(p, t);
+                    ArrayList<PageId> transactionToPageArrayList = transactionToPageExclusive.get(t);
+                    
+                    if (transactionToPageArrayList == null) {
+                        transactionToPageArrayList = new ArrayList<PageId>();
+                    }
+
+                    if (!transactionToPageArrayList.contains(p)) {
+                        transactionToPageArrayList.add(p);
+                    }
+
+                    transactionToPageExclusive.put(t, transactionToPageArrayList);
+                    return isValid;
+                }
+
+            } else {
+
+                if (!usedExclusiveLock || exclusiveT.equals(t)) {
+                    if (sharedT == null) {
+                        sharedT = new ArrayList<TransactionId>();
+                    }
+
+                    if (!sharedT.contains(t)) {
+                        sharedT.add(t);
+                    }
+                    pageToTransactionShared.put(t, sharedT)
+
+                    ArrayList<PageId> transactionToPageArrayList = transationToPageShared.get(t);
+                    if (transactionToPageArrayList == null) {
+                        transactionToPageArrayList = new ArrayList<PageId>();
+                    }
+
+                    if (!transactionToPageArrayList.contains(p)) {
+                        transactionToPageArrayList.add(p);
+                    }
+
+                    transactionToPageShared.put(t, transactionToPageArrayList);
+                    isValid = true;
+                    return isValid;
+
+                } else {
+                    return isValid;
+                }
+            }
+        }
+
+
+        public synchronized void releasePage(TransactionId t, PageId p) {
+
+            ArrayList<PageId> exclusivePages = transactionToPageExclusive.get(t);
+            if (exclusivePages != null) {
+                exclusivePages.remove(p);
+                transactionToPageShared.put(t, exclusivePages);
+            }
+
+            ArrayList<TransactionId> sharedTransactions = pageToTransactionShared.get(p);
+            if (sharedTransactions != null) {
+                sharedTransactions.remove(t);
+                pageToTransactionShared.put(p, sharedTransactions);
+            }
+
+
+            ArrayList<PageId> sharedPages = transactionToPageShared.get(t);
+            if (sharedPages != null) {
+                sharedPages.remove(p);
+                transactionToPageShared.put(t, sharedPages);
+            }
+
+            pageToTransactionExclusive.remove(p);
+        }
+
+        public synchronized boolean holdsLock(TransactionId t, PageId p) {
+            TransactionId exclusiveT = pageToTransactionExclusive(p);
+            if (exclusiveT != null && exclusiveT.equals(t)) {
+                return true;
+            }
+
+
+            ArrayList<TransactionId> transactionPages = pageToTransactionShared.get(p);
+            if (transactionPages != null && transactionPages.contains(t)) {
+                return true;
+            }
+
+            return false;
+        }
+
+
+    }
+
     /**
      * Releases the lock on a page.
      * Calling this is very risky, and may result in wrong behavior. Think hard
@@ -90,6 +247,7 @@ public class BufferPool {
     public  void releasePage(TransactionId tid, PageId pid) {
         // some code goes here
         // not necessary for proj1
+        self.theLock.releasePage(tid, pid);
     }
 
     /**
@@ -105,7 +263,9 @@ public class BufferPool {
     public boolean holdsLock(TransactionId tid, PageId p) {
         // some code goes here
         // not necessary for proj1
-        return false;
+        boolean retVal;
+        retVal = theLock.holdsLock(tid, p);
+        return retVal;
     }
 
     /**
