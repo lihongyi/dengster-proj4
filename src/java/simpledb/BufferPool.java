@@ -322,8 +322,6 @@ public class BufferPool {
             }
         }
         myLock.releaseAllLocks(tid);
-     //release all locks
-
     }
     /**
      * Add a tuple to the specified table behalf of transaction tid.  Will
@@ -469,6 +467,7 @@ public class BufferPool {
                     try {
                         flushPage(pid);
                         myPages.remove(pid);
+                        myQueue.remove(i);
                         isEvicted = true;
                         break;                    
                     } catch (IOException e) {
