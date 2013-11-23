@@ -97,6 +97,18 @@ public class BufferPool {
             transactionToPageExclusive = new Hashtable<TransactionId, ArrayList<PageId>>();
         }
 
+        public synchronized void releaseAllLocks(TransactionId t) {
+            for (pid : pageToTransactionShared.keySet()) {
+                ArrayList<TranasctionId> sharedTransactions = pageToTransactionShared.get(pid);
+                if (sharedTransactions != null) {
+                    if (sharedTransactions.contains(t)) {
+                        sharedTransactions.remove(t);
+                    }
+                    pageToTransactionShared.put(pid, sharedTransactions);
+                }
+            }
+        }
+
         public synchronized boolean getLock(PageId p, TransactionId t, Permissions perm) {
 
             ArrayList<TransactionId> sharedT = pageToTransactionShared.get(p);
@@ -298,6 +310,7 @@ public class BufferPool {
                 }
             }
         }
+        myLock.releaseAllLocks(tid);
      //release all locks
 
     }
