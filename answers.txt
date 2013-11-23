@@ -1,0 +1,16 @@
+Design Decisions:
+For question 1 & 2:
+#### JUSTIN PLS #####
+
+For evictPage and transactionComplete, there were not any design decisions as it was pretty straightfoward with waht was specified.
+
+NO STEAL/FORCE vs STEAL/NO FORCE buffer management policy:
+
+STEAL/NO FORCE is more complicated because STEAL complicates atomicity since we could possible have dirty writes, and NO FORCE is more difficult to implement durability, and might still have to force some pages to disk, but minimal. If our system could crash while running transactionComplete then we would have to implement a way of making sure we can undo and redo the write, so that we can clear the dirty write, and make sure that we get a clean write.
+
+
+ACID properties
+No steal and force ensure atomicity and durability.
+
+API changes:
+#######JUSTIN DID YOU MAKE API CHANGES? I DID NOT###########
