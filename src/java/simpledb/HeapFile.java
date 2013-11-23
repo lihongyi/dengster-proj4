@@ -191,7 +191,7 @@ public class HeapFile implements DbFile {
         public void upThePage() throws DbException, TransactionAbortedException {
             current_page++;
             current_heapPageId = new HeapPageId(myFile.getId(), current_page);
-            current_heapPage = (HeapPage) Database.getBufferPool().getPage(transactionId, current_heapPageId, null);
+            current_heapPage = (HeapPage) Database.getBufferPool().getPage(transactionId, current_heapPageId, Permissions.READ_ONLY);
             current_iterator = current_heapPage.iterator();
         }
         
@@ -209,7 +209,7 @@ public class HeapFile implements DbFile {
         public void open() throws DbException, TransactionAbortedException {
             this.current_page = 0;
             this.current_heapPageId = new HeapPageId(myFile.getId(), current_page);
-            this.current_heapPage = (HeapPage) Database.getBufferPool().getPage(transactionId, current_heapPageId, null);
+            this.current_heapPage = (HeapPage) Database.getBufferPool().getPage(transactionId, current_heapPageId, Permissions.READ_ONLY);
             this.current_iterator = current_heapPage.iterator();
             this.openForSale = true;
         }
