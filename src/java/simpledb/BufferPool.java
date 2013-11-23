@@ -481,14 +481,14 @@ public class BufferPool {
     // }
 
        private synchronized  void evictPage() throws DbException {
-       Set<PageId> bufferpoolPIDs = BPoolPageMap.keySet();
+       Set<PageId> bufferpoolPIDs = myPages.keySet();
        List<PageId> pidList = new ArrayList<PageId>(bufferpoolPIDs);
        
        boolean evicted = false;
         // check if all the pages are dirty
         boolean allDirty = true;
         int pageCount = 0;
-        Collection<Page> allPages = BPoolPageMap.values();
+        Collection<Page> allPages = myPages.values();
         for(Page p: allPages){
             if(p.isDirty() == null){
                 // at least one non dirty page exists
@@ -509,14 +509,14 @@ public class BufferPool {
            int randomInt = randomGenerator.nextInt(pidList.size());
            
            PageId pageIdToEvict = pidList.get(randomInt);
-           Page pageToChk = BPoolPageMap.get(pageIdToEvict);
+           Page pageToChk = myPages.get(pageIdToEvict);
            
            // check if a transaction has written data to the page
            // for NO STEAL
            if(pageToChk.isDirty() == null){
                try {
                    flushPage(pageIdToEvict);
-                   BPoolPageMap.remove(pageIdToEvict);
+                   myPages.remove(pageIdToEvict);
                    evicted = true;
                } catch (IOException e) {
                    System.out.println(e.getMessage());
