@@ -450,10 +450,14 @@ public class BufferPool {
             Page p = myPages.get(pid);
            
             if (p.isDirty() == null) {
-                flushPage(pid);
-                myPages.remove(pid);
-                isEvicted = true;
-                break;
+                try {
+                    flushPage(pid);
+                    myPages.remove(pid);
+                    isEvicted = true;
+                    break;                    
+                } catch (IOException e) {
+                    System.out.println("Exception Thrown:" + e.getMessage());
+                }
             }
    
         }
