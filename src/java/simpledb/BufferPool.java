@@ -21,7 +21,7 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
-    private HashMap<PageId, Page> myPages;
+    private Hashtable<PageId, Page> myPages;
     private int maxPages;
     private ArrayList<PageId> myQueue;
     private theLock myLock;
@@ -34,7 +34,7 @@ public class BufferPool {
     public BufferPool(int numPages) {
         // some code goes here
         maxPages = numPages;
-        myPages = new HashMap<PageId, Page>();
+        myPages = new Hashtable<PageId, Page>();
         myQueue = new ArrayList<PageId>();
         myLock = new theLock();
     }
@@ -60,15 +60,19 @@ public class BufferPool {
 
         boolean freeLock = myLock.getLock(pid, tid, perm);
         long lockAcquireTime = System.currentTimeMillis();
+
         while (!freeLock) {
             long waitingTime = System.currentTimeMillis();
 
+            freeLock = myLock.getLock(pid, tid, perm);
+
+            /** This just means we're timing out big time AKA deadlock. */
             if ((waitingTime - lockAcquireTime) > 300) {
+                /** Add this line because people on Piazza said so. */
                 myLock.releaseAllLocks(tid);
+
                 throw new TransactionAbortedException();
             }
-
-            freeLock = myLock.getLock(pid, tid, perm);
         }
         if (myPages.containsKey(pid)) {
 
@@ -93,36 +97,44 @@ public class BufferPool {
 
     public class theLock {
 
+        /** Two hash tables. One to map pages to transactions for shared locks. 
+        /*  The other is pages to transactions for exclusive locks. */
         private Hashtable<PageId, ArrayList<TransactionId>> pageToTransactionShared;
         private Hashtable<PageId, TransactionId> pageToTransactionExclusive;
-        private Hashtable<TransactionId, ArrayList<PageId>> transactionToPageShared;
-        private Hashtable<TransactionId, ArrayList<PageId>> transactionToPageExclusive;
 
         public theLock() {
             pageToTransactionExclusive = new Hashtable<PageId, TransactionId>();
             pageToTransactionShared = new Hashtable<PageId, ArrayList<TransactionId>>();
-            transactionToPageShared = new Hashtable<TransactionId, ArrayList<PageId>>();
-            transactionToPageExclusive = new Hashtable<TransactionId, ArrayList<PageId>>();
         }
 
         public synchronized void releaseAllLocks(TransactionId t) {
+
+            /** See what transactions our pages have locked up. */
             for (PageId pid : pageToTransactionShared.keySet()) {
                 ArrayList<TransactionId> sharedTransactions = pageToTransactionShared.get(pid);
                 if (sharedTransactions != null) {
+
+                    /** If a page has our transaction locked up, GET RID OF
+                    /*  THAT SHIT! */
                     if (sharedTransactions.contains(t)) {
-                        sharedTransactions.remove(t);
+                        /** Outsource this to our other method. */
+                        releasePage(t, pid);
                     }
-                    pageToTransactionShared.put(pid, sharedTransactions);
                 }
             }
+
+            /** Can't outsource because we will have ConcurrentModificationException. 
+            /*  This means we'll have to do this shit manually. Yuck. */
             ArrayList<PageId> pagesToRemove = new ArrayList<PageId>();
             for (PageId pid : pageToTransactionExclusive.keySet()) {
                 TransactionId t1 = pageToTransactionExclusive.get(pid);
-                if (t1 != null && t1.equals(t)) {
-                    pagesToRemove.add(pid);
+                if (t1 != null) {
+                    if (t1.equals(t)) {
+                        pagesToRemove.add(pid);
+                    }
                 }
             }
-            transactionToPageExclusive.remove(t);
+
             for (PageId p : pagesToRemove) {
                 pageToTransactionExclusive.remove(p);
             }
@@ -153,6 +165,14 @@ public class BufferPool {
                 /** If transactions have a shared lock on this page. */
                 if (usedSharedLock) {
 
+                    /** This edge case is that only one transaction has a shared
+                    /*  on this page. However, we have to make sure that said tranaction
+                    /*  is actually OUR transaction. If not, BOOT. */
+                    if (sharedT.size() == 1 && !sharedT.contains(t)) {
+                        isValid = false;
+                        return isValid;
+                    }
+
                     /** Can't get exclusive lock because more than one transaction
                     /*  has control of the shared lock .*/
                     if (sharedT.size() > 1) {
@@ -160,13 +180,6 @@ public class BufferPool {
                         return isValid;
                     }
 
-                    /** The other edge case is that only one transaction has a shared
-                    /*  on this page. However, we have to make sure that said tranaction
-                    /*  is actually OUR transaction. If not, BOOT. */
-                    if (sharedT.size() == 1 && !sharedT.contains(t)) {
-                        isValid = false;
-                        return isValid;
-                    }
                 }
 
                 /** If a transaction does have an exclusive lock, make sure that
@@ -174,21 +187,13 @@ public class BufferPool {
                 if (usedExclusiveLock && !exclusiveT.equals(t)) {
                     isValid = false;
                     return isValid;
-                } else { /** AKA we are clear! */
+                } else { 
+
+                    /** AKA we are clear! */
                     isValid = true;
 
                     pageToTransactionExclusive.put(p, t);
-                    ArrayList<PageId> transactionToPageArrayList = transactionToPageExclusive.get(t);
-                    
-                    if (transactionToPageArrayList == null) {
-                        transactionToPageArrayList = new ArrayList<PageId>();
-                    }
 
-                    if (!transactionToPageArrayList.contains(p)) {
-                        transactionToPageArrayList.add(p);
-                    }
-
-                    transactionToPageExclusive.put(t, transactionToPageArrayList);
                     return isValid;
                 }
 
@@ -202,18 +207,9 @@ public class BufferPool {
                     if (!sharedT.contains(t)) {
                         sharedT.add(t);
                     }
+
                     pageToTransactionShared.put(p, sharedT);
 
-                    ArrayList<PageId> transactionToPageArrayList = transactionToPageShared.get(t);
-                    if (transactionToPageArrayList == null) {
-                        transactionToPageArrayList = new ArrayList<PageId>();
-                    }
-
-                    if (!transactionToPageArrayList.contains(p)) {
-                        transactionToPageArrayList.add(p);
-                    }
-
-                    transactionToPageShared.put(t, transactionToPageArrayList);
                     isValid = true;
                     return isValid;
 
@@ -227,23 +223,10 @@ public class BufferPool {
 
         public synchronized void releasePage(TransactionId t, PageId p) {
 
-            ArrayList<PageId> exclusivePages = transactionToPageExclusive.get(t);
-            if (exclusivePages != null) {
-                exclusivePages.remove(p);
-                transactionToPageShared.put(t, exclusivePages);
-            }
-
             ArrayList<TransactionId> sharedTransactions = pageToTransactionShared.get(p);
             if (sharedTransactions != null) {
                 sharedTransactions.remove(t);
                 pageToTransactionShared.put(p, sharedTransactions);
-            }
-
-
-            ArrayList<PageId> sharedPages = transactionToPageShared.get(t);
-            if (sharedPages != null) {
-                sharedPages.remove(p);
-                transactionToPageShared.put(t, sharedPages);
             }
 
             pageToTransactionExclusive.remove(p);
@@ -454,22 +437,18 @@ public class BufferPool {
         // some code goes here
         // not necessary for proj1
 
-        boolean isAllDirty = true;
+        int dirtyPages = 0;
         boolean isEvicted = false;
-        int pages = 0;
-        Collection<Page> allPagesValue = myPages.values();
-        for (Page p : allPagesValue) {
-            if (p.isDirty() == null) {
-                isAllDirty = false;
-                break;
-            } else {
-                pages++;
+
+        for (Page p : myPages.values()) {
+            if (p.isDirty() != null) {
+                dirtyPages++;
             }
         }
 
-        
-        if (isAllDirty && pages == maxPages) {
-            throw new DbException("all dirty.");
+        /** This condition just means that all pages ended up being dirty. */
+        if (dirtyPages == maxPages) {
+            throw new DbException("All dirty. Get that shit out of here.");
         }
         
         while (!isEvicted) {
