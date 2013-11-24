@@ -1,8 +1,12 @@
 Design Decisions:
-For question 1 & 2:
-#### JUSTIN PLS #####
+So like the spec asked, we wrote an auxiliary class dealing with all the lock stuff. The spec pretty much wrote this class for us. We have 2 hashtables -- one for shared locks, the other for exclusive -- that map a page to the transaction(s) have a respective lock on said page. There are then 4 methods: [1] getLock (self-explanatory) [2] releaseLock (also self-explanatory / mandated by spec) [3] releaseAllLocks (which basically just calls releaseLock for every appropriate situation) [4] holdsLock (which is a boolean that tests whether or not a lock / mandated by spec). A lot of hair-pulling/wrangling was needed to write this class.
 
-For evictPage and transactionComplete, there were not any design decisions as it was pretty straightfoward with waht was specified.
+For deadlock, we just used a time-out policy of 300 seconds. This was achieved by measuring the time our 'while-the-lock-is-not-free' loop took to run. If it exceeded 300 seconds, we threw an exception.
+
+Lastly, we decided to manually call the releaseAllLocks method before we threw said exception because people on Piazza said it would help speed up our tests.
+
+
+For evictPage and transactionComplete, there were not any design decisions as it was pretty straightfoward with what was specified.
 
 NO STEAL/FORCE vs STEAL/NO FORCE buffer management policy:
 
@@ -13,4 +17,4 @@ ACID properties
 No steal and force ensure atomicity and durability.
 
 API changes:
-#######JUSTIN DID YOU MAKE API CHANGES? I DID NOT###########
+We do not think we made any API changes...
