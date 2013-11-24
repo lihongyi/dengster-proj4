@@ -59,7 +59,15 @@ public class BufferPool {
         // some code goes here
 
         boolean freeLock = myLock.getLock(pid, tid, perm);
+        long lockAcquireTime = System.currentTimeMillis();
         while (!freeLock) {
+            long waitingTime = System.currentTimeMillis();
+
+            if ((waitingTime - lockAcquireTime) > 300) {
+                myLock.releaseAllLocks(tid);
+                throw new TransactionAbortedException();
+            }
+
             freeLock = myLock.getLock(pid, tid, perm);
         }
         if (myPages.containsKey(pid)) {
@@ -72,7 +80,7 @@ public class BufferPool {
         } else {
             Page retVal = Database.getCatalog().getDbFile(pid.getTableId()).readPage(pid);
 
-            if (myPages.size() > maxPages) {
+            if (myPages.size() >= maxPages) {
                 this.evictPage();
             } else {
                 myPages.put(pid, retVal);
@@ -448,18 +456,20 @@ public class BufferPool {
 
         boolean isAllDirty = true;
         boolean isEvicted = false;
+        int pages = 0;
         Collection<Page> allPagesValue = myPages.values();
-        while (isAllDirty) {
-            for (Page p : allPagesValue) {
-                if (p.isDirty() == null) {
-                    isAllDirty = false;
-                    break;
-                }
+        for (Page p : allPagesValue) {
+            if (p.isDirty() == null) {
+                isAllDirty = false;
+                break;
+            } else {
+                pages++;
             }
+        }
+
         
-            if (isAllDirty) {
-                throw new DbException("all dirty.");
-            }
+        if (isAllDirty && pages == maxPages) {
+            throw new DbException("all dirty.");
         }
         
         while (!isEvicted) {
