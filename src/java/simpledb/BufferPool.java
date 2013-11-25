@@ -69,7 +69,10 @@ public class BufferPool {
             /** This just means we're timing out big time AKA deadlock. */
             if ((waitingTime - lockAcquireTime) > 300) {
                 /** Add this line because people on Piazza said so. */
-                myLock.releaseAllLocks(tid);
+                ArrayList<PageId> pids = myLock.getAppropriatePageIds(tid);
+                for (PageId p : pids) {
+                    myLock.releasePage(tid, p);
+                }
 
                 throw new TransactionAbortedException();
             }
@@ -107,8 +110,8 @@ public class BufferPool {
             pageToTransactionShared = new Hashtable<PageId, ArrayList<TransactionId>>();
         }
 
-        public synchronized void releaseAllLocks(TransactionId t) {
-
+        public synchronized ArrayList<PageId> getAppropriatePageIds(TransactionId t) {
+            ArrayList<PageId> retVal = new ArrayList<PageId>();
             /** See what transactions our pages have locked up. */
             for (PageId pid : pageToTransactionShared.keySet()) {
                 ArrayList<TransactionId> sharedTransactions = pageToTransactionShared.get(pid);
@@ -118,28 +121,29 @@ public class BufferPool {
                     /*  THAT SHIT! */
                     if (sharedTransactions.contains(t)) {
                         /** Outsource this to our other method. */
-                        releasePage(t, pid);
+                        if (!retVal.contains(pid)) {
+                            retVal.add(pid);
+                        }
                     }
                 }
             }
 
-            /** Can't outsource because we will have ConcurrentModificationException. 
-            /*  This means we'll have to do this shit manually. Yuck. */
-            ArrayList<PageId> pagesToRemove = new ArrayList<PageId>();
             for (PageId pid : pageToTransactionExclusive.keySet()) {
                 TransactionId t1 = pageToTransactionExclusive.get(pid);
                 if (t1 != null) {
                     if (t1.equals(t)) {
-                        pagesToRemove.add(pid);
+                        if (!retVal.contains(pid)) {
+                            retVal.add(pid);
+                        }
                     }
                 }
             }
 
-            for (PageId p : pagesToRemove) {
-                pageToTransactionExclusive.remove(p);
-            }
+
+            return retVal;
         }
 
+       
         public synchronized boolean getLock(PageId p, TransactionId t, Permissions perm) {
 
             ArrayList<TransactionId> sharedT = pageToTransactionShared.get(p);
@@ -312,7 +316,10 @@ public class BufferPool {
                 }
             }
         }
-        myLock.releaseAllLocks(tid);
+        ArrayList<PageId> pids = myLock.getAppropriatePageIds(tid);
+        for (PageId p : pids) {
+            myLock.releasePage(tid, p);
+        }
 
         
     }
